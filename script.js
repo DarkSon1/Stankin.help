@@ -74,7 +74,7 @@ async function parseRoomNumberWithData(room) {
 
 // ========== BFS: ПОИСК КРАТЧАЙШЕГО ПУТИ ==========
 function findPathBFS(startNode, endNode) {
-    // Пока заглушка — возвращаем простой маршрут
+    // Временная заглушка — пока просто текст
     return {
         steps: [
             `📍 Отправление: ${startNode.buildingName} корпус, ${startNode.floor} этаж, аудитория ${startNode.original}`,
