@@ -29,7 +29,7 @@ function getImageForNode(node) {
 function findPath(start, end) {
     const paths = graphData.paths;
     const distances = graphData.distances || {};
-    const isAuditory = (node) => /^\d{4}$/.test(node) || /^[А-Я]/.test(node);
+    const isAuditory = (node) => /^\d{4}$/.test(node);
     const getExit = (node) => `exit_${node}`;
 
     const pq = [{ node: start, dist: 0, path: [start] }];
@@ -95,58 +95,29 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
 
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
         const scaleX = canvas.width / img.width;
         const scaleY = canvas.height / img.height;
 
-        // Рисуем путь
-        const path = currentPathSteps.flatMap(step => [step.from, step.to]);
-        const uniquePath = [...new Map(path.map(p => [p, p])).values()];
-        
-        for (let i = 0; i < uniquePath.length - 1; i++) {
-            const from = graphData.coordinates[uniquePath[i]];
-            const to = graphData.coordinates[uniquePath[i + 1]];
-            if (!from || !to) continue;
-            const fromX = from.x * scaleX;
-            const fromY = from.y * scaleY;
-            const toX = to.x * scaleX;
-            const toY = to.y * scaleY;
-            ctx.beginPath();
-            ctx.moveTo(fromX, fromY);
-            ctx.lineTo(toX, toY);
-            ctx.strokeStyle = '#ff3333';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-        }
+        const fromX = fromCoord.x * scaleX;
+        const fromY = fromCoord.y * scaleY;
+        const toX = toCoord.x * scaleX;
+        const toY = toCoord.y * scaleY;
 
-        // Рисуем синие круги на всех точках
-        for (let node of uniquePath) {
-            const coord = graphData.coordinates[node];
-            if (!coord) continue;
-            const x = coord.x * scaleX;
-            const y = coord.y * scaleY;
-            ctx.beginPath();
-            ctx.arc(x, y, 8, 0, 2 * Math.PI);
-            ctx.fillStyle = '#0066ff';
-            ctx.fill();
-            ctx.fillStyle = 'white';
-            ctx.font = '12px monospace';
-            ctx.fillText(node.slice(-4), x - 15, y - 5);
-        }
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = '#ff3333';
+        ctx.lineWidth = 4;
+        ctx.stroke();
 
-        // 🚩 и 🏁
-        const firstNode = uniquePath[0];
-        const lastNode = uniquePath[uniquePath.length - 1];
-        const firstCoord = graphData.coordinates[firstNode];
-        const lastCoord = graphData.coordinates[lastNode];
-        if (firstCoord) {
-            ctx.font = 'bold 16px sans-serif';
+        ctx.font = 'bold 16px sans-serif';
+        if (isFirst) {
             ctx.fillStyle = '#2196F3';
-            ctx.fillText('🚩 Вы', firstCoord.x * scaleX + 10, firstCoord.y * scaleY - 6);
+            ctx.fillText('🚩 Вы', fromX + 10, fromY - 6);
         }
-        if (lastCoord) {
+        if (isLast) {
             ctx.fillStyle = '#4CAF50';
-            ctx.fillText('🏁', lastCoord.x * scaleX + 10, lastCoord.y * scaleY - 6);
+            ctx.fillText('🏁', toX + 10, toY - 6);
         }
 
         container.appendChild(canvas);
@@ -160,30 +131,27 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
         }
     };
 }
+
 function startNavigation(start, end) {
-    // Временный жёсткий путь по коридорам
-    const hardcodedPath = [
-        "0208",
-        "exit_0208",
-        "cor_627_339",
-        "cor_627_211",
-        "cor_816_211",
-        "cor_816_340",
-        "cor_994_340",
-        "exit_0204",
-        "0204"
-    ];
-    currentPathSteps = splitPathByImages(hardcodedPath);
+    const path = findPath(start, end);
+    if (!path) {
+        alert('Маршрут не найден');
+        return;
+    }
+    currentPathSteps = splitPathByImages(path);
     currentStep = 0;
     showStep();
 }
+
 function showStep() {
     const container = document.getElementById('mapContainer');
     if (!container) return;
     const step = currentPathSteps[currentStep];
     if (!step) return;
+
     const isFirst = currentStep === 0;
     const isLast = currentStep === currentPathSteps.length - 1;
+
     drawStep(container, step.from, step.to, step.image, isFirst, isLast, () => {
         if (currentStep + 1 < currentPathSteps.length) {
             currentStep++;
