@@ -4,23 +4,26 @@ let currentSteps = [];
 let selectedFrom = null;
 let selectedTo = null;
 
+const fallbackGroups = [
+    { name: "Новый корпус, 1 этаж", rooms: ["0102","0103","0104","0105","0106","0161","0119","0120","0112","0113","0114"] },
+    { name: "Новый корпус, 2 этаж", rooms: ["0201","0202","0203","0204","0205","0206","0207","0208","0209","0210","0211"] },
+    { name: "Старый корпус А, 1 этаж", rooms: ["ТП-8 ЛТТО ЦТМ","ТП-7 ЛТИиКРИ ЦТМ","ЦЕНТР КОЛЛАБОРАТИВНОЙ РОБОТОТЕХНИКИ","ТП-5а ЦКР ЦТМ","ТП-4 ЛТМ ЦТМ","ТП-5 ЛТПДМ ЦТМ","ТП-6 ЛТГО ЦТМ","СЕРВЕРНАЯ","ЛАБОРАТОРИЯ ГИДРАВЛИКИ","135з","135и"] },
+    { name: "Старый корпус А, 2 этаж", rooms: ["218","219","220","221","222","223","223а","223б","224","225","233 (ДЕКАНАТ)","234а","234б","234","235а","235б","235в","235ж","235е","235д","235г","237","238","239","СТОЛОВАЯ"] }
+];
+
 async function loadGraphData() {
-    const res = await fetch('data/graph.json');
-    graphData = await res.json();
+    try {
+        const res = await fetch('data/graph.json');
+        graphData = await res.json();
+    } catch(e) {
+        console.warn('graph.json не загружен, используем fallback');
+        graphData = null;
+    }
     buildAuditoryList();
 }
 
 function buildAuditoryList() {
-    // Запасной список, если graph.json не загрузился
-    const fallbackGroups = [
-        { name: "Новый корпус, 1 этаж", rooms: ["0102","0103","0104","0105","0106","0161","0119","0120","0112","0113","0114"] },
-        { name: "Новый корпус, 2 этаж", rooms: ["0201","0202","0203","0204","0205","0206","0207","0208","0209","0210","0211"] },
-        { name: "Старый корпус А, 1 этаж", rooms: ["ТП-8 ЛТТО ЦТМ","ТП-7 ЛТИиКРИ ЦТМ","ЦЕНТР КОЛЛАБОРАТИВНОЙ РОБОТОТЕХНИКИ","ТП-5а ЦКР ЦТМ","ТП-4 ЛТМ ЦТМ","ТП-5 ЛТПДМ ЦТМ","ТП-6 ЛТГО ЦТМ","СЕРВЕРНАЯ","ЛАБОРАТОРИЯ ГИДРАВЛИКИ","135з","135и"] },
-        { name: "Старый корпус А, 2 этаж", rooms: ["218","219","220","221","222","223","223а","223б","224","225","233 (ДЕКАНАТ)","234а","234б","234","235а","235б","235в","235ж","235е","235д","235г","237","238","239","СТОЛОВАЯ"] }
-    ];
-
-    if (graphData && graphData.buildings && graphData.buildings.new && graphData.buildings.new.floors) {
-        // Данные из JSON
+    if (graphData && graphData.buildings?.new?.floors) {
         window.auditoryGroups = [
             { name: "Новый корпус, 1 этаж", rooms: graphData.buildings.new.floors["1"] || [] },
             { name: "Новый корпус, 2 этаж", rooms: graphData.buildings.new.floors["2"] || [] },
@@ -28,7 +31,6 @@ function buildAuditoryList() {
             { name: "Старый корпус А, 2 этаж", rooms: graphData.buildings.old?.wings?.A?.floors?.["2"] || [] }
         ];
     } else {
-        // Запасной список
         window.auditoryGroups = fallbackGroups;
     }
 }
@@ -38,7 +40,7 @@ function openModal(target) {
     const modalList = document.getElementById('modalList');
     modalList.innerHTML = '';
 
-    groups.forEach(group => {
+    window.auditoryGroups.forEach(group => {
         if (!group.rooms || group.rooms.length === 0) return;
         const groupDiv = document.createElement('div');
         groupDiv.className = 'modal-group';
@@ -66,31 +68,23 @@ function openModal(target) {
     modal.style.display = 'flex';
 }
 
-// Поиск в модалке
 document.getElementById('modalSearch').addEventListener('input', (e) => {
     const search = e.target.value.toLowerCase();
-    const items = document.querySelectorAll('.modal-item');
-    items.forEach(item => {
-        const text = item.textContent.toLowerCase();
-        item.style.display = text.includes(search) ? 'block' : 'none';
+    document.querySelectorAll('.modal-item').forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(search) ? 'flex' : 'none';
     });
 });
 
-// Закрытие модалки
-document.querySelector('.modal-close').onclick = () => {
-    document.getElementById('auditoryModal').style.display = 'none';
-};
+document.querySelector('.modal-close').onclick = () => document.getElementById('auditoryModal').style.display = 'none';
 window.onclick = (e) => {
-    if (e.target === document.getElementById('auditoryModal')) {
-        document.getElementById('auditoryModal').style.display = 'none';
-    }
+    if (e.target === document.getElementById('auditoryModal')) document.getElementById('auditoryModal').style.display = 'none';
 };
 
-// Триггеры
 document.getElementById('fromTrigger').onclick = () => openModal('from');
 document.getElementById('toTrigger').onclick = () => openModal('to');
 
 function getImageForNode(node) {
+    if (!graphData || !graphData.coordinates) return null;
     const c = graphData.coordinates[node];
     if (!c) return null;
     if (c.building === 'new') return `/assets/maps/new_${c.floor}.jpg`;
@@ -100,6 +94,7 @@ function getImageForNode(node) {
 }
 
 function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext) {
+    if (!graphData) return;
     const fromCoord = graphData.coordinates[fromNode];
     const toCoord = graphData.coordinates[toNode];
     if (!fromCoord || !toCoord) return;
@@ -156,7 +151,6 @@ function startManualRoute() {
         document.getElementById('result').style.display = 'block';
         return;
     }
-
     currentSteps = [
         { from: "0208", to: "exit_new_to_transition", image: "/assets/maps/new_2.jpg", isFirst: true, isLast: false },
         { from: "enter_transition_from_new", to: "exit_transition_to_old", image: "/assets/maps/transition_old_new.png", isFirst: false, isLast: false },
@@ -177,7 +171,6 @@ function showManualStep() {
     });
 }
 
-// Остальные обработчики кнопок (переключение панелей, reset и т.д.) остаются без изменений
 document.getElementById('findBtn').addEventListener('click', () => {
     if (!selectedFrom || !selectedTo) return alert('Выберите обе аудитории');
     startManualRoute();
@@ -195,7 +188,6 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     document.getElementById('mapContainer').innerHTML = '';
 });
 
-// Переключение панелей (как в предыдущей версии)
 document.getElementById('navBtn').onclick = () => {
     document.getElementById('navigatorPanel').style.display = 'block';
     document.getElementById('mapPanel').style.display = 'none';
