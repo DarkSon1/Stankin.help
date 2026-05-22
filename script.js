@@ -11,14 +11,26 @@ async function loadGraphData() {
 }
 
 function buildAuditoryList() {
-    const groups = [
-        { name: "Новый корпус, 1 этаж", rooms: graphData.buildings.new.floors["1"] },
-        { name: "Новый корпус, 2 этаж", rooms: graphData.buildings.new.floors["2"] },
-        { name: "Старый корпус А, 1 этаж", rooms: graphData.buildings.old.wings.A.floors["1"] },
-        { name: "Старый корпус А, 2 этаж", rooms: graphData.buildings.old.wings.A.floors["2"] }
+    // Запасной список, если graph.json не загрузился
+    const fallbackGroups = [
+        { name: "Новый корпус, 1 этаж", rooms: ["0102","0103","0104","0105","0106","0161","0119","0120","0112","0113","0114"] },
+        { name: "Новый корпус, 2 этаж", rooms: ["0201","0202","0203","0204","0205","0206","0207","0208","0209","0210","0211"] },
+        { name: "Старый корпус А, 1 этаж", rooms: ["ТП-8 ЛТТО ЦТМ","ТП-7 ЛТИиКРИ ЦТМ","ЦЕНТР КОЛЛАБОРАТИВНОЙ РОБОТОТЕХНИКИ","ТП-5а ЦКР ЦТМ","ТП-4 ЛТМ ЦТМ","ТП-5 ЛТПДМ ЦТМ","ТП-6 ЛТГО ЦТМ","СЕРВЕРНАЯ","ЛАБОРАТОРИЯ ГИДРАВЛИКИ","135з","135и"] },
+        { name: "Старый корпус А, 2 этаж", rooms: ["218","219","220","221","222","223","223а","223б","224","225","233 (ДЕКАНАТ)","234а","234б","234","235а","235б","235в","235ж","235е","235д","235г","237","238","239","СТОЛОВАЯ"] }
     ];
 
-    window.auditoryGroups = groups;
+    if (graphData && graphData.buildings && graphData.buildings.new && graphData.buildings.new.floors) {
+        // Данные из JSON
+        window.auditoryGroups = [
+            { name: "Новый корпус, 1 этаж", rooms: graphData.buildings.new.floors["1"] || [] },
+            { name: "Новый корпус, 2 этаж", rooms: graphData.buildings.new.floors["2"] || [] },
+            { name: "Старый корпус А, 1 этаж", rooms: graphData.buildings.old?.wings?.A?.floors?.["1"] || [] },
+            { name: "Старый корпус А, 2 этаж", rooms: graphData.buildings.old?.wings?.A?.floors?.["2"] || [] }
+        ];
+    } else {
+        // Запасной список
+        window.auditoryGroups = fallbackGroups;
+    }
 }
 
 function openModal(target) {
