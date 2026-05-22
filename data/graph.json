@@ -3,35 +3,61 @@
     "new": {
       "name": "Новый корпус",
       "floors": {
-        "1": ["0102", "0103", "0104", "0105", "0106", "0161", "0119", "0120", "0112", "0113", "0114"],
-        "2": ["0201", "0202", "0203", "0204", "0205", "0206", "0207", "0208", "0209", "0210", "0211"]
-      }
-    },
-    "old": {
-      "name": "Старый корпус",
-      "wings": {
-        "A": {
-          "floors": {
-            "1": ["ТП-8 ЛТТО ЦТМ", "ТП-7 ЛТИиКРИ ЦТМ", "ЦЕНТР КОЛЛАБОРАТИВНОЙ РОБОТОТЕХНИКИ", "ТП-5а ЦКР ЦТМ", "ТП-4 ЛТМ ЦТМ", "ТП-5 ЛТПДМ ЦТМ", "ТП-6 ЛТГО ЦТМ", "СЕРВЕРНАЯ", "ЛАБОРАТОРИЯ ГИДРАВЛИКИ", "135з", "135и"],
-            "2": ["218", "219", "220", "221", "222", "223", "223а", "223б", "224", "225", "233 (ДЕКАНАТ)", "234а", "234б", "234", "235а", "235б", "235в", "235ж", "235е", "235д", "235г", "237", "238", "239", "СТОЛОВАЯ"]
-          }
-        }
+        "1": [],
+        "2": ["0201", "0202", "0203", "0204", "0205", "0206", "0207", "0208", "0209"]
       }
     }
   },
   "coordinates": {
-    "0208": { "x": 115, "y": 170, "floor": 2, "building": "new" },
-    "exit_new_to_transition": { "x": 1007, "y": 64, "floor": 2, "building": "new" },
-    "enter_transition_from_new": { "x": 1505, "y": 369, "floor": "transition", "building": "transition" },
-    "exit_transition_to_old": { "x": 169, "y": 365, "floor": "transition", "building": "transition" },
-    "enter_old_from_transition": { "x": 870, "y": 872, "floor": 1, "building": "old", "wing": "A" },
-    "ТП-8 ЛТТО ЦТМ": { "x": 2386, "y": 1006, "floor": 1, "building": "old", "wing": "A" }
+    "0208": { "x": 195, "y": 258, "floor": 2, "building": "new" },
+    "exit_0208": { "x": 198, "y": 339, "floor": 2, "building": "new" },
+    "0207": { "x": 199, "y": 532, "floor": 2, "building": "new" },
+    "exit_0207": { "x": 198, "y": 339, "floor": 2, "building": "new" },
+    "0209": { "x": 240, "y": 158, "floor": 2, "building": "new" },
+    "exit_0209": { "x": 242, "y": 340, "floor": 2, "building": "new" },
+    "0206": { "x": 248, "y": 479, "floor": 2, "building": "new" },
+    "exit_0206": { "x": 242, "y": 340, "floor": 2, "building": "new" },
+    "0204": { "x": 948, "y": 457, "floor": 2, "building": "new" },
+    "exit_0204": { "x": 945, "y": 346, "floor": 2, "building": "new" },
+    "0203": { "x": 1048, "y": 205, "floor": 2, "building": "new" },
+    "exit_0203": { "x": 996, "y": 205, "floor": 2, "building": "new" },
+    "0201": { "x": 930, "y": 108, "floor": 2, "building": "new" },
+    "exit_0201": { "x": 1006, "y": 107, "floor": 2, "building": "new" },
+    "0202": { "x": 1089, "y": 114, "floor": 2, "building": "new" },
+    "exit_0202": { "x": 1006, "y": 107, "floor": 2, "building": "new" },
+    "exit_to_transition": { "x": 1007, "y": 58, "floor": 2, "building": "new" },
+    "exit_to_stairs": { "x": 694, "y": 136, "floor": 2, "building": "new" },
+    "cor_627_339": { "x": 627, "y": 339, "floor": 2, "building": "new" },
+    "cor_627_211": { "x": 627, "y": 211, "floor": 2, "building": "new" },
+    "cor_816_211": { "x": 816, "y": 211, "floor": 2, "building": "new" },
+    "cor_816_340": { "x": 816, "y": 340, "floor": 2, "building": "new" },
+    "cor_994_340": { "x": 994, "y": 340, "floor": 2, "building": "new" },
+    "cor_627_136": { "x": 627, "y": 136, "floor": 2, "building": "new" }
   },
   "paths": {
-    "0208": ["exit_new_to_transition"],
-    "exit_new_to_transition": ["enter_transition_from_new"],
-    "enter_transition_from_new": ["exit_transition_to_old"],
-    "exit_transition_to_old": ["enter_old_from_transition"],
-    "enter_old_from_transition": ["ТП-8 ЛТТО ЦТМ"]
+    "0208": ["exit_0208"],
+    "exit_0208": ["0208", "cor_627_339"],
+    "0207": ["exit_0207"],
+    "exit_0207": ["0207", "cor_627_339"],
+    "0209": ["exit_0209"],
+    "exit_0209": ["0209", "cor_627_339"],
+    "0206": ["exit_0206"],
+    "exit_0206": ["0206", "cor_627_339"],
+    "0204": ["exit_0204"],
+    "exit_0204": ["0204", "cor_994_340"],
+    "0203": ["exit_0203"],
+    "exit_0203": ["0203", "cor_994_340"],
+    "0201": ["exit_0201"],
+    "exit_0201": ["0201", "cor_816_211"],
+    "0202": ["exit_0202"],
+    "exit_0202": ["0202", "cor_816_211"],
+    "exit_to_transition": ["cor_627_136", "cor_816_211"],
+    "exit_to_stairs": ["cor_627_136"],
+    "cor_627_339": ["exit_0208", "exit_0207", "exit_0209", "exit_0206", "cor_627_211"],
+    "cor_627_211": ["cor_627_339", "cor_816_211", "cor_627_136"],
+    "cor_816_211": ["cor_627_211", "exit_0201", "exit_0202", "cor_816_340"],
+    "cor_816_340": ["cor_816_211", "cor_994_340"],
+    "cor_994_340": ["cor_816_340", "exit_0204", "exit_0203"],
+    "cor_627_136": ["cor_627_211", "exit_to_transition", "exit_to_stairs"]
   }
 }
