@@ -3,7 +3,9 @@ let currentStep = 0;
 let currentPathSteps = [];
 
 async function loadGraphData() {
-    const res = await fetch(`data/graph.json?v=${Date.now()}`);
+    const res = await fetch(`data/graph.json?v=${Date.now()}`, {
+        cache: 'no-store'
+    });
     graphData = await res.json();
     setupAutocomplete();
 }
