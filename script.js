@@ -226,6 +226,15 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     currentPathSteps = [];
     currentStep = 0;
 });
-
+// ========== ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК ==========
+document.querySelectorAll('.menu-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tabId = btn.dataset.tab;
+        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(tab => tab.style.display = 'none');
+        document.getElementById(`${tabId}Tab`).style.display = 'block';
+    });
+});
 // Запускаем при открытии страницы
 loadGraphData();
