@@ -125,16 +125,22 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
 }
 
 function startNavigation(start, end) {
-    const path = findPath(start, end);
-    if (!path) {
-        alert('Маршрут не найден');
-        return;
-    }
-    currentPathSteps = splitPathByImages(path);
+    // Временный жёсткий путь по коридорам
+    const hardcodedPath = [
+        "0208",
+        "exit_0208",
+        "cor_627_339",
+        "cor_627_211",
+        "cor_816_211",
+        "cor_816_340",
+        "cor_994_340",
+        "exit_0204",
+        "0204"
+    ];
+    currentPathSteps = splitPathByImages(hardcodedPath);
     currentStep = 0;
     showStep();
 }
-
 function showStep() {
     const container = document.getElementById('mapContainer');
     if (!container) return;
