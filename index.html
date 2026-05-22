@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>stankin.help — навигатор</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="/manifest.json">
@@ -11,10 +11,15 @@
     <div class="container">
         <div class="header">
             <div class="logo">stankin.<span class="highlight">help</span></div>
-            <p class="tagline">Навигатор по корпусам</p>
+            <div class="nav-buttons">
+                <button id="navBtn" class="active">🧭 Навигатор</button>
+                <button id="mapBtn">🗺️ Карта вуза</button>
+                <button id="scheduleBtn">📅 Расписание</button>
+            </div>
         </div>
-        
-        <div class="input-card">
+
+        <!-- Панель навигатора -->
+        <div id="navigatorPanel" class="input-card">
             <div class="input-group">
                 <label>📍 Откуда</label>
                 <input type="text" id="from" list="auditories-list" placeholder="0208 или ТП-8 ЛТТО ЦТМ">
@@ -27,6 +32,21 @@
             <button id="resetBtn" style="background: #555; margin-top: 8px;">Сбросить маршрут</button>
         </div>
 
+        <!-- Панель карты вуза (заглушка) -->
+        <div id="mapPanel" style="display: none;">
+            <div class="info-card">
+                🗺️ Карта вуза появится позже
+            </div>
+        </div>
+
+        <!-- Панель расписания (заглушка) -->
+        <div id="schedulePanel" style="display: none;">
+            <div class="info-card">
+                📅 Расписание появится позже
+            </div>
+        </div>
+
+        <!-- Результат маршрута -->
         <div id="result" class="result-card" style="display: none;">
             <h3>🗺️ Маршрут</h3>
             <div id="mapContainer"></div>
