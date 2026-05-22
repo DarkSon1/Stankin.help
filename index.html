@@ -22,13 +22,21 @@
         <div id="navigatorPanel" class="input-card">
             <div class="input-group">
                 <label>📍 Откуда</label>
-                <input type="text" id="from" list="auditories-list" placeholder="0208 или ТП-8 ЛТТО ЦТМ">
+                <div class="custom-select-trigger" id="fromTrigger">
+                    <span class="selected-value">Выберите аудиторию</span>
+                    <span class="arrow">▼</span>
+                </div>
             </div>
+
             <div class="input-group">
                 <label>🎯 Куда</label>
-                <input type="text" id="to" list="auditories-list" placeholder="0208 или ТП-8 ЛТТО ЦТМ">
+                <div class="custom-select-trigger" id="toTrigger">
+                    <span class="selected-value">Выберите аудиторию</span>
+                    <span class="arrow">▼</span>
+                </div>
             </div>
-            <button id="findBtn">Построить маршрут →</button>
+
+            <button id="findBtn" disabled>Построить маршрут →</button>
             <button id="resetBtn" style="background: #555; margin-top: 8px;">Сбросить маршрут</button>
         </div>
 
@@ -53,7 +61,22 @@
         </div>
     </div>
 
-    <datalist id="auditories-list"></datalist>
+    <!-- Кастомное модальное окно -->
+    <div id="auditoryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Выберите аудиторию</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-search">
+                <input type="text" id="modalSearch" placeholder="🔍 Поиск аудитории...">
+            </div>
+            <div class="modal-list" id="modalList">
+                <!-- Список будет заполнен JS -->
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
