@@ -3,201 +3,78 @@
     padding: 0;
     box-sizing: border-box;
 }
-
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
     min-height: 100vh;
     padding: 20px;
 }
-
 .container {
     max-width: 600px;
     margin: 0 auto;
 }
-
 .header {
     text-align: center;
     margin-bottom: 30px;
-    padding: 20px 0;
 }
-
 .logo {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 2.2rem;
+    font-weight: bold;
     color: white;
 }
-
 .logo .highlight {
     color: #4ecdc4;
 }
-
 .tagline {
     color: rgba(255,255,255,0.7);
-    font-size: 1rem;
-    margin-top: 8px;
 }
-
 .input-card {
     background: rgba(255,255,255,0.95);
-    border-radius: 24px;
-    padding: 28px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    border-radius: 28px;
+    padding: 24px;
     margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
-
 .input-group {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
-
 .input-group label {
-    display: block;
     font-weight: 600;
+    display: block;
     margin-bottom: 8px;
     color: #1a1a2e;
 }
-
-.input-group input {
-    width: 100%;
-    padding: 14px 16px;
-    font-size: 1rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 16px;
-}
-
-button {
+input, button {
     width: 100%;
     padding: 14px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: white;
-    background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+    border-radius: 40px;
     border: none;
-    border-radius: 16px;
+    font-size: 1rem;
+}
+input {
+    border: 2px solid #e2e2e2;
+    background: white;
+}
+button {
+    background: linear-gradient(135deg, #4ecdc4, #2c7a6e);
+    color: white;
+    font-weight: bold;
     cursor: pointer;
+    transition: 0.2s;
 }
-
 button:hover {
-    transform: scale(1.02);
+    transform: scale(1.01);
+    opacity: 0.9;
 }
-
 .result-card {
     background: white;
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    border-radius: 28px;
+    padding: 20px;
 }
-
 #mapContainer canvas {
     max-width: 100%;
     height: auto;
-    border-radius: 16px;
-}
-/* Три кнопки сверху */
-.top-menu {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.menu-btn {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: 0.2s;
-    width: auto;
-}
-
-.menu-btn.active {
-    background: #4ecdc4;
-    color: #1a1a2e;
-    font-weight: bold;
-}
-
-.tab-content {
-    transition: 0.2s;
-}
-
-.info-card {
-    background: rgba(255,255,255,0.95);
-    border-radius: 24px;
-    padding: 28px;
-    text-align: center;
-    color: #1a1a2e;
-}
-
-/* Ручное масштабирование карты */
-#mapContainer canvas {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
     touch-action: pinch-zoom;
-    cursor: grab;
-}
-
-#mapContainer canvas:active {
-    cursor: grabbing;
-}
-/* Увеличенные кнопки меню */
-.top-menu {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.menu-btn {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    border: none;
-    padding: 14px 24px;
-    border-radius: 40px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-    width: auto;
-    min-width: 120px;
-}
-
-.menu-btn.active {
-    background: #4ecdc4;
-    color: #1a1a2e;
-    font-weight: bold;
-}
-
-/* Красивый datalist */
-input[list] {
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 16px;
-    padding: 14px 16px;
-    font-size: 1rem;
-    width: 100%;
-    transition: 0.2s;
-}
-
-input[list]:focus {
-    border-color: #4ecdc4;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(78,205,196,0.2);
-}
-
-/* Адаптация */
-@media (max-width: 600px) {
-    .menu-btn {
-        padding: 10px 16px;
-        font-size: 0.9rem;
-        min-width: 100px;
-    }
 }
