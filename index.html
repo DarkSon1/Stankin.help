@@ -17,54 +17,22 @@
             <p class="tagline">Коридорный навигатор</p>
         </div>
 
-        <!-- ТРИ НОВЫЕ КНОПКИ СВЕРХУ -->
-        <div class="top-menu">
-            <button class="menu-btn active" data-tab="nav">🧭 Навигация</button>
-            <button class="menu-btn" data-tab="map">🗺️ Карта университета</button>
-            <button class="menu-btn" data-tab="schedule">📅 Расписание</button>
+        <div class="input-card">
+            <div class="input-group">
+                <label>📍 Откуда</label>
+                <input type="text" id="from" list="auditories-list" placeholder="Например: 0208" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <label>🎯 Куда</label>
+                <input type="text" id="to" list="auditories-list" placeholder="Например: 0204" autocomplete="off">
+            </div>
+            <button id="findBtn">Построить маршрут →</button>
+            <button id="resetBtn" style="background: #555; margin-top: 8px;">Сбросить маршрут</button>
         </div>
 
-        <!-- Блок НАВИГАЦИИ (виден по умолчанию) -->
-        <div id="navTab" class="tab-content active">
-            <div class="input-card">
-                <div class="input-group">
-                    <label>📍 Откуда</label>
-                    <input type="text" id="from" list="auditories-list" placeholder="Например: 0208" autocomplete="off">
-                </div>
-                <div class="input-group">
-                    <label>🎯 Куда</label>
-                    <input type="text" id="to" list="auditories-list" placeholder="Например: ТП-8_ЛТТО_ЦТМ" autocomplete="off">
-                </div>
-                <button id="findBtn">Построить маршрут →</button>
-                <button id="resetBtn" style="background: #555; margin-top: 8px;">Сбросить маршрут</button>
-            </div>
-
-            <div id="result" class="result-card" style="display: none;">
-                <h3>🗺️ Маршрут</h3>
-                <div id="mapContainer"></div>
-                <!-- КНОПКИ УПРАВЛЕНИЯ МАРШРУТОМ -->
-                <div id="routeControls" style="display: none; margin-top: 16px; gap: 10px; justify-content: center;">
-                    <button id="prevStepBtn" style="background: #555; width: auto; padding: 8px 20px;">◀ Назад</button>
-                    <button id="nextStepBtn" style="background: #4ecdc4; width: auto; padding: 8px 20px;">Дальше ▶</button>
-                    <button id="finishStepBtn" style="background: #2c7a6e; width: auto; padding: 8px 20px;">🏁 Финиш</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Блок КАРТА (заглушка) -->
-        <div id="mapTab" class="tab-content" style="display: none;">
-            <div class="info-card">
-                <h3>🗺️ Карта университета</h3>
-                <p>Раздел в разработке. Скоро здесь появится карта всего кампуса.</p>
-            </div>
-        </div>
-
-        <!-- Блок РАСПИСАНИЕ (заглушка) -->
-        <div id="scheduleTab" class="tab-content" style="display: none;">
-            <div class="info-card">
-                <h3>📅 Расписание</h3>
-                <p>Раздел в разработке. Скоро здесь появится расписание занятий.</p>
-            </div>
+        <div id="result" class="result-card" style="display: none;">
+            <h3>🗺️ Маршрут</h3>
+            <div id="mapContainer"></div>
         </div>
     </div>
 
