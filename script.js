@@ -2,14 +2,19 @@ let graphData = null;
 let currentStep = 0;
 let currentPathSteps = [];
 
+// 1. Загрузка графа
 async function loadGraphData() {
-    const res = await fetch('data/graph.json?v=' + Date.now());
-    graphData = await res.json();
-    setupAutocomplete();
+    try {
+        const res = await fetch('data/graph.json?v=' + Date.now());
+        graphData = await res.json();
+        setupAutocomplete();
+    } catch (e) {
+        console.error('Ошибка загрузки графа:', e);
+    }
 }
 
+// 2. Настройка автокомплита (ищет все 4-значные аудитории)
 function setupAutocomplete() {
-    // Собираем все аудитории (ключи из 4 цифр) для выпадающего списка
     const allRooms = Object.keys(graphData.coordinates).filter(k => /^\d{4}$/.test(k));
     const datalist = document.getElementById('auditories-list');
     datalist.innerHTML = '';
@@ -20,7 +25,7 @@ function setupAutocomplete() {
     });
 }
 
-// Поддержка разных корпусов и этажей
+// 3. Получение правильной картинки в зависимости от корпуса и этажа
 function getImageForNode(node) {
     const c = graphData.coordinates[node];
     if (!c) return null;
@@ -31,7 +36,7 @@ function getImageForNode(node) {
     return null;
 }
 
-// Алгоритм Дейкстры (учитывает веса)
+// 4. Алгоритм Дейкстры (ищет путь с минимальным весом)
 function findPath(start, end) {
     const paths = graphData.paths;
     const distances = graphData.distances || {};
@@ -40,7 +45,6 @@ function findPath(start, end) {
     const visitedDist = { [start]: 0 };
 
     while (pq.length) {
-        // Сортируем очередь для алгоритма Дейкстры (выбираем ближайший узел)
         pq.sort((a, b) => a.dist - b.dist);
         const { node, dist, path } = pq.shift();
         
@@ -51,7 +55,7 @@ function findPath(start, end) {
         const neighbors = paths[node] || [];
 
         for (const next of neighbors) {
-            // Ищем вес ребра в обоих направлениях
+            // Проверяем вес ребра в обе стороны
             const edge1 = `${node}-${next}`;
             const edge2 = `${next}-${node}`;
             const edgeDist = distances[edge1] !== undefined ? distances[edge1] : 
@@ -65,10 +69,10 @@ function findPath(start, end) {
             }
         }
     }
-    return null;
+    return null; // Путь не найден
 }
 
-// Исправленная разбивка по этажам (без визуальных разрывов)
+// 5. Разбивка пути на этажи/картинки (сохраняет связность на лестницах/переходах)
 function splitPathByImages(path) {
     if (!path || path.length === 0) return [];
     const steps = [];
@@ -82,11 +86,11 @@ function splitPathByImages(path) {
         if (img === currentImg) {
             currentNodes.push(node);
         } else {
-            // Добавляем узел перехода в текущий шаг, чтобы дорисовать линию до конца
+            // Завершаем текущий кусок точкой перехода
             currentNodes.push(node);
             steps.push({ nodes: currentNodes, image: currentImg });
             
-            // Начинаем следующий шаг с этой же точки
+            // Начинаем новый кусок с этой же точки
             currentNodes = [node];
             currentImg = img;
         }
@@ -99,7 +103,7 @@ function splitPathByImages(path) {
     return steps;
 }
 
-// Отрисовка всего маршрута (линия по всем точкам, а не напрямую сквозь стены)
+// 6. Отрисовка маршрута
 function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext) {
     const img = new Image();
     img.src = imageSrc;
@@ -124,7 +128,7 @@ function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext) {
         let lastX = 0, lastY = 0;
         let firstX = 0, firstY = 0;
 
-        // Рисуем линии через все коридорные узлы
+        // Рисуем ломаную линию через все узлы массива
         nodes.forEach((node) => {
             const coord = graphData.coordinates[node];
             if (coord) {
@@ -143,28 +147,28 @@ function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext) {
             }
         });
 
-        // Стилизация линии
+        // Настройки линии
         ctx.strokeStyle = '#ff3333';
         ctx.lineWidth = 4;
-        ctx.lineJoin = 'round'; // Сглаживание углов поворота
+        ctx.lineJoin = 'round'; 
         ctx.lineCap = 'round';
         ctx.stroke();
 
-        ctx.font = 'bold 16px sans-serif';
+        // Рисуем флажки
+        ctx.font = 'bold 20px sans-serif';
         if (isFirst && firstDrawn) {
-            ctx.fillStyle = '#2196F3';
-            ctx.fillText('🚩 Вы', firstX + 10, firstY - 6);
+            ctx.fillText('🚩', firstX - 10, firstY - 10);
         }
         if (isLast && firstDrawn) {
-            ctx.fillStyle = '#4CAF50';
-            ctx.fillText('🏁', lastX + 10, lastY - 6);
+            ctx.fillText('🏁', lastX - 10, lastY - 10);
         }
 
         container.appendChild(canvas);
 
+        // Кнопка перехода на следующий этаж
         if (onNext) {
             const btn = document.createElement('button');
-            btn.textContent = '→ Дальше';
+            btn.textContent = '→ Переход на следующий этаж/корпус';
             btn.style.marginTop = '16px';
             btn.onclick = onNext;
             container.appendChild(btn);
@@ -172,10 +176,11 @@ function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext) {
     };
 }
 
+// 7. Управление интерфейсом
 function startNavigation(start, end) {
     const path = findPath(start, end);
     if (!path) {
-        alert('Маршрут не найден! Проверьте, существуют ли такие аудитории.');
+        alert('Не удалось проложить маршрут! Проверьте, связаны ли эти точки в graph.json.');
         return;
     }
     currentPathSteps = splitPathByImages(path);
@@ -192,7 +197,6 @@ function showStep() {
     const isFirst = currentStep === 0;
     const isLast = currentStep === currentPathSteps.length - 1;
 
-    // Передаем массив узлов (step.nodes) вместо start/end
     drawStep(container, step.nodes, step.image, isFirst, isLast, () => {
         if (currentStep + 1 < currentPathSteps.length) {
             currentStep++;
@@ -204,8 +208,12 @@ function showStep() {
 document.getElementById('findBtn').addEventListener('click', async () => {
     const from = document.getElementById('from').value.trim();
     const to = document.getElementById('to').value.trim();
-    if (!from || !to) return alert('Введите обе аудитории');
-    if (!graphData) await loadGraphData();
+    
+    if (!from || !to) return alert('Пожалуйста, введите обе аудитории');
+    if (!graphData.coordinates[from] || !graphData.coordinates[to]) {
+        return alert('Одной из аудиторий нет в базе данных навигатора');
+    }
+
     startNavigation(from, to);
     document.getElementById('result').style.display = 'block';
 });
@@ -219,5 +227,5 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     currentStep = 0;
 });
 
-// Инициализация при загрузке
+// Запускаем при открытии страницы
 loadGraphData();
