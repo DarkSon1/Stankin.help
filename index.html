@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>stankin.help — навигатор</title>
-    <script>
-        const cssVersion = Date.now();
-        document.write('<link rel="stylesheet" href="style.css?v=' + cssVersion + '">');
-    </script>
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0, s-maxage=0">
+    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="-1">
+    <meta http-equiv="Expires" content="0">
 </head>
 <body>
     <div class="container">
@@ -39,10 +36,6 @@
     </div>
 
     <datalist id="auditories-list"></datalist>
-
-    <script>
-        const version = Date.now();
-        document.write('<script src="script.js?v=' + version + '"><\/script>');
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
