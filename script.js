@@ -28,16 +28,24 @@ function getImageForNode(node) {
 
 function findPath(start, end) {
     const paths = graphData.paths;
-    const queue = [[start]];
-    const visited = new Set();
-    while (queue.length) {
-        const path = queue.shift();
-        const node = path[path.length - 1];
+    const distances = graphData.distances || {};
+    const pq = [{ node: start, dist: 0, path: [start] }];
+    const visitedDist = { [start]: 0 };
+
+    while (pq.length) {
+        pq.sort((a, b) => a.dist - b.dist);
+        const { node, dist, path } = pq.shift();
         if (node === end) return path;
-        if (visited.has(node)) continue;
-        visited.add(node);
+        if (visitedDist[node] !== undefined && visitedDist[node] < dist) continue;
+
         for (const next of paths[node] || []) {
-            if (!visited.has(next)) queue.push([...path, next]);
+            const edgeKey = `${node}->${next}`;
+            const edgeDist = distances[edgeKey] || 1;
+            const newDist = dist + edgeDist;
+            if (visitedDist[next] === undefined || newDist < visitedDist[next]) {
+                visitedDist[next] = newDist;
+                pq.push({ node: next, dist: newDist, path: [...path, next] });
+            }
         }
     }
     return null;
