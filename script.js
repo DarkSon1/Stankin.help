@@ -66,10 +66,23 @@ function findPath(start, end) {
 function splitPathByImages(path) {
     const steps = [];
     for (let i = 0; i < path.length - 1; i++) {
+        const from = path[i];
+        const to = path[i + 1];
+
+        // Пропускаем отрезки внутри аудиторий (0208 → exit_0208 или exit_0208 → 0208)
+        const isFromExit = from.startsWith("exit_");
+        const isToExit = to.startsWith("exit_");
+        const isFromAuditory = /^\d{4}$/.test(from);
+        const isToAuditory = /^\d{4}$/.test(to);
+
+        if ((isFromAuditory && isToExit) || (isFromExit && isToAuditory)) {
+            continue; // не рисуем внутри аудитории
+        }
+
         steps.push({
-            from: path[i],
-            to: path[i + 1],
-            image: getImageForNode(path[i])
+            from: from,
+            to: to,
+            image: getImageForNode(from)
         });
     }
     return steps;
