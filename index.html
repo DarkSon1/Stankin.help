@@ -2,49 +2,28 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>stankin.help — навигатор</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <div class="logo">stankin.<span class="highlight">help</span></div>
-            <div class="nav-buttons">
-                <button id="navBtn" class="active">🧭 Навигатор</button>
-                <button id="mapBtn">🗺️ Карта вуза</button>
-                <button id="scheduleBtn">📅 Расписание</button>
-            </div>
+            <p class="tagline">Навигатор по корпусам</p>
         </div>
 
-        <div id="navigatorPanel" class="input-card">
+        <div class="input-card">
             <div class="input-group">
                 <label>📍 Откуда</label>
-                <div class="custom-select-trigger" id="fromTrigger">
-                    <span class="selected-value">Выберите аудиторию</span>
-                    <span class="arrow">▼</span>
-                </div>
+                <input type="text" id="from" list="auditories-list" placeholder="0208">
             </div>
-
             <div class="input-group">
                 <label>🎯 Куда</label>
-                <div class="custom-select-trigger" id="toTrigger">
-                    <span class="selected-value">Выберите аудиторию</span>
-                    <span class="arrow">▼</span>
-                </div>
+                <input type="text" id="to" list="auditories-list" placeholder="0204">
             </div>
-
-            <button id="findBtn" disabled>Построить маршрут →</button>
+            <button id="findBtn">Построить маршрут →</button>
             <button id="resetBtn" style="background: #555; margin-top: 8px;">Сбросить маршрут</button>
-        </div>
-
-        <div id="mapPanel" style="display: none;">
-            <div class="info-card">🗺️ Карта вуза появится позже</div>
-        </div>
-
-        <div id="schedulePanel" style="display: none;">
-            <div class="info-card">📅 Расписание появится позже</div>
         </div>
 
         <div id="result" class="result-card" style="display: none;">
@@ -53,18 +32,10 @@
         </div>
     </div>
 
-    <div id="auditoryModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Выберите аудиторию</h3>
-                <span class="modal-close">&times;</span>
-            </div>
-            <div class="modal-search">
-                <input type="text" id="modalSearch" placeholder="🔍 Поиск аудитории...">
-            </div>
-            <div class="modal-list" id="modalList"></div>
-        </div>
-    </div>
+    <datalist id="auditories-list">
+        <option value="0208">
+        <option value="0204">
+    </datalist>
 
     <script src="script.js"></script>
 </body>
