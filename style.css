@@ -1,55 +1,96 @@
-/* 1. Базовые настройки */
-body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-    background: #f4f4f9; 
-    padding: 20px; 
+* {
     margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
-
-/* 2. Контейнер результатов */
-#result { 
-    display: none; 
-    margin-top: 20px; 
-    text-align: center; 
+body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    min-height: 100vh;
+    padding: 20px;
 }
-
-#mapContainer { 
-    max-width: 100%; 
-    margin: 0 auto; 
-    overflow: hidden;
+.container {
+    max-width: 600px;
+    margin: 0 auto;
 }
-
-/* 3. Отрисовка карты */
-canvas { 
-    max-width: 100%; 
-    height: auto; 
-    border: 1px solid #ccc; 
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    background: white;
+.header {
+    text-align: center;
+    margin-bottom: 30px;
 }
-
-/* 4. Навигация */
-.nav-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
+.logo {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: white;
 }
-
-.nav-buttons button {
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
+.logo .highlight {
+    color: #4ecdc4;
+}
+.tagline {
+    color: rgba(255,255,255,0.7);
+}
+.input-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 28px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+.input-group {
+    margin-bottom: 18px;
+}
+.input-group label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 8px;
+    color: #1a1a2e;
+}
+input, button {
+    width: 100%;
+    padding: 14px;
+    border-radius: 40px;
     border: none;
-    border-radius: 8px;
-    background: #4CAF50;
+    font-size: 1rem;
+}
+input {
+    border: 2px solid #e2e2e2;
+    background: white;
+    outline: none;
+    transition: border-color 0.2s;
+}
+input:focus {
+    border-color: #4ecdc4;
+}
+button {
+    background: linear-gradient(135deg, #4ecdc4, #2c7a6e);
     color: white;
     font-weight: bold;
-    transition: background 0.3s;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
 }
+button:hover {
+    transform: scale(1.01);
+    opacity: 0.9;
+}
+.result-card {
+    background: white;
+    border-radius: 28px;
+    padding: 20px;
+}
+.result-card h3 {
+    margin-bottom: 15px;
+    color: #1a1a2e;
+}
+#mapContainer canvas {
+    max-width: 100%;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    touch-action: pinch-zoom; /* Для зума пальцами на телефонах */
+    display: block;
+}
+/* --- ДОБАВЬ ЭТО В КОНЕЦ СВОЕГО CSS ФАЙЛА --- */
 
-.nav-buttons button:hover { background: #45a049; }
-.nav-buttons button.back { background: #f44336; }
+/* Стили для контейнера кнопок, чтобы они стояли красиво */
 .nav-buttons {
     display: flex;
     justify-content: center;
@@ -82,4 +123,3 @@ canvas {
     display: block;
     margin: 0 auto;
 }
-.nav-buttons button.finish { background: #2196F3; }
