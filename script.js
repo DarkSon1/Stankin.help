@@ -1,18 +1,6 @@
 let graphData = null;
 let currentStep = 0;
-let currentSteps = [];
-
-// Переключение вкладок
-document.querySelectorAll('.menu-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        const tab = btn.dataset.tab;
-        document.getElementById('navigatorTab').style.display = tab === 'navigator' ? 'block' : 'none';
-        document.getElementById('mapTab').style.display = tab === 'map' ? 'block' : 'none';
-        document.getElementById('scheduleTab').style.display = tab === 'schedule' ? 'block' : 'none';
-    });
-});
+let currentPathSteps = [];
 
 async function loadGraphData() {
     const res = await fetch('data/graph.json');
@@ -21,13 +9,7 @@ async function loadGraphData() {
 }
 
 function setupAutocomplete() {
-    const allRooms = [];
-    for (let f in graphData.buildings.new.floors)
-        allRooms.push(...graphData.buildings.new.floors[f]);
-    for (let w in graphData.buildings.old.wings)
-        for (let f in graphData.buildings.old.wings[w].floors)
-            allRooms.push(...graphData.buildings.old.wings[w].floors[f]);
-
+    const allRooms = graphData.buildings.new.floors["2"];
     const datalist = document.getElementById('auditories-list');
     datalist.innerHTML = '';
     allRooms.forEach(r => {
@@ -35,6 +17,61 @@ function setupAutocomplete() {
         opt.value = r;
         datalist.appendChild(opt);
     });
+}
+
+function getImageForNode(node) {
+    const c = graphData.coordinates[node];
+    if (!c) return null;
+    if (c.building === 'new') return `/assets/maps/new_${c.floor}.jpg`;
+    return null;
+}
+
+function findPath(start, end) {
+    const paths = graphData.paths;
+    const queue = [[start]];
+    const visited = new Set();
+    while (queue.length) {
+        const path = queue.shift();
+        const node = path[path.length - 1];
+        if (node === end) return path;
+        if (visited.has(node)) continue;
+        visited.add(node);
+        for (const next of paths[node] || []) {
+            if (!visited.has(next)) queue.push([...path, next]);
+        }
+    }
+    return null;
+}
+
+function splitPathByImages(path) {
+    const steps = [];
+    let currentStepNodes = [path[0]];
+    for (let i = 0; i < path.length - 1; i++) {
+        const from = path[i];
+        const to = path[i + 1];
+        const imgFrom = getImageForNode(from);
+        const imgTo = getImageForNode(to);
+        if (imgFrom === imgTo) {
+            currentStepNodes.push(to);
+        } else {
+            if (currentStepNodes.length >= 2) {
+                steps.push({
+                    from: currentStepNodes[0],
+                    to: currentStepNodes[currentStepNodes.length - 1],
+                    image: imgFrom
+                });
+            }
+            currentStepNodes = [from, to];
+        }
+    }
+    if (currentStepNodes.length >= 2) {
+        steps.push({
+            from: currentStepNodes[0],
+            to: currentStepNodes[currentStepNodes.length - 1],
+            image: getImageForNode(currentStepNodes[0])
+        });
+    }
+    return steps;
 }
 
 function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext) {
@@ -46,7 +83,6 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
     img.src = imageSrc;
     img.onload = () => {
         container.innerHTML = '';
-
         const maxWidth = Math.min(img.width, window.innerWidth - 40, 1200);
         const canvas = document.createElement('canvas');
         canvas.width = maxWidth;
@@ -54,25 +90,20 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
         canvas.style.width = '100%';
         canvas.style.height = 'auto';
         canvas.style.touchAction = 'pinch-zoom';
-
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
         const scaleX = canvas.width / img.width;
         const scaleY = canvas.height / img.height;
-
         const fromX = fromCoord.x * scaleX;
         const fromY = fromCoord.y * scaleY;
         const toX = toCoord.x * scaleX;
         const toY = toCoord.y * scaleY;
-
         ctx.beginPath();
         ctx.moveTo(fromX, fromY);
         ctx.lineTo(toX, toY);
         ctx.strokeStyle = '#ff3333';
         ctx.lineWidth = 4;
         ctx.stroke();
-
         ctx.font = 'bold 16px sans-serif';
         if (isFirst) {
             ctx.fillStyle = '#2196F3';
@@ -82,7 +113,6 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
             ctx.fillStyle = '#4CAF50';
             ctx.fillText('🏁', toX + 10, toY - 6);
         }
-
         container.appendChild(canvas);
         if (onNext) {
             const btn = document.createElement('button');
@@ -94,12 +124,13 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
     };
 }
 
-function startManualRoute() {
-    currentSteps = [
-        { from: "0208", to: "exit_new_to_transition", image: "/assets/maps/new_2.jpg", isFirst: true, isLast: false },
-        { from: "enter_transition_from_new", to: "exit_transition_to_old", image: "/assets/maps/transition_old_new.png", isFirst: false, isLast: false },
-        { from: "enter_old_from_transition", to: "ТП-8 ЛТТО ЦТМ", image: "/assets/maps/old_1A.jpg", isFirst: false, isLast: true }
-    ];
+function startNavigation(start, end) {
+    const path = findPath(start, end);
+    if (!path) {
+        alert('Маршрут не найден');
+        return;
+    }
+    currentPathSteps = splitPathByImages(path);
     currentStep = 0;
     showStep();
 }
@@ -107,11 +138,12 @@ function startManualRoute() {
 function showStep() {
     const container = document.getElementById('mapContainer');
     if (!container) return;
-    const step = currentSteps[currentStep];
+    const step = currentPathSteps[currentStep];
     if (!step) return;
-
-    drawStep(container, step.from, step.to, step.image, step.isFirst, step.isLast, () => {
-        if (currentStep + 1 < currentSteps.length) {
+    const isFirst = currentStep === 0;
+    const isLast = currentStep === currentPathSteps.length - 1;
+    drawStep(container, step.from, step.to, step.image, isFirst, isLast, () => {
+        if (currentStep + 1 < currentPathSteps.length) {
             currentStep++;
             showStep();
         }
@@ -123,7 +155,7 @@ document.getElementById('findBtn').addEventListener('click', async () => {
     const to = document.getElementById('to').value.trim();
     if (!from || !to) return alert('Введите обе аудитории');
     if (!graphData) await loadGraphData();
-    startManualRoute();
+    startNavigation(from, to);
     document.getElementById('result').style.display = 'block';
 });
 
@@ -132,9 +164,8 @@ document.getElementById('resetBtn').addEventListener('click', () => {
     document.getElementById('to').value = '';
     document.getElementById('result').style.display = 'none';
     document.getElementById('mapContainer').innerHTML = '';
-    currentSteps = [];
+    currentPathSteps = [];
     currentStep = 0;
 });
 
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 loadGraphData();
