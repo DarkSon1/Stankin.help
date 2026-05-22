@@ -117,8 +117,32 @@ button:hover {
     box-shadow: 0 0 8px rgba(78,205,196,0.5);
 }
 
-/* Нижнее подчёркивание для активной кнопки (дополнительно) */
+/* Верхнее меню */
+.top-menu {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.menu-btn {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    width: auto;
+    backdrop-filter: blur(4px);
+}
+
 .menu-btn.active {
+    background: #4ecdc4;
+    color: #1a1a2e;
     text-decoration: underline;
     text-underline-offset: 6px;
     text-decoration-thickness: 2px;
@@ -137,29 +161,10 @@ button:hover {
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
 
-/* Кнопки управления маршрутом */
 #routeControls {
     display: flex;
     gap: 12px;
     justify-content: center;
     margin-top: 20px;
     flex-wrap: wrap;
-}
-
-#routeControls button {
-    width: auto;
-    padding: 10px 24px;
-    font-size: 0.95rem;
-}
-
-#nextStepBtn {
-    background: linear-gradient(135deg, #4ecdc4, #2c7a6e);
-}
-
-#prevStepBtn, #finishStepBtn {
-    background: #555;
-}
-
-#finishStepBtn {
-    background: #2c7a6e;
 }
