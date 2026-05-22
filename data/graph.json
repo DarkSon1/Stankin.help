@@ -18,7 +18,6 @@
     "exit_0202": { "x": 1006, "y": 107, "floor": 2, "building": "new" },
     "exit_new_to_transition": { "x": 1007, "y": 58, "floor": 2, "building": "new" },
     "exit_to_stairs_new2": { "x": 694, "y": 136, "floor": 2, "building": "new" },
-
     "cor_627_339": { "x": 627, "y": 339, "floor": 2, "building": "new" },
     "cor_627_211": { "x": 627, "y": 211, "floor": 2, "building": "new" },
     "cor_816_211": { "x": 816, "y": 211, "floor": 2, "building": "new" },
@@ -46,7 +45,6 @@
     "exit_224a": { "x": 143, "y": 346, "floor": "transition", "building": "transition" },
     "232_профком": { "x": 257, "y": 440, "floor": "transition", "building": "transition" },
     "exit_232_профком": { "x": 143, "y": 440, "floor": "transition", "building": "transition" },
-
     "cor_transition_1290_418": { "x": 1290, "y": 418, "floor": "transition", "building": "transition" },
     "cor_transition_1290_346": { "x": 1290, "y": 346, "floor": "transition", "building": "transition" },
     "cor_transition_143_346": { "x": 143, "y": 346, "floor": "transition", "building": "transition" },
@@ -81,7 +79,6 @@
     "Вход_выход_из_вуза": { "x": 2084, "y": 1210, "floor": 1, "building": "old_A" },
     "Лестница2А": { "x": 2421, "y": 820, "floor": 1, "building": "old_A" },
     "exit_Лестница2А": { "x": 2224, "y": 820, "floor": 1, "building": "old_A" },
-
     "cor_old1A_891_868": { "x": 891, "y": 868, "floor": 1, "building": "old_A" },
     "cor_old1A_1450_558": { "x": 1450, "y": 558, "floor": 1, "building": "old_A" },
     "cor_old1A_2084_868": { "x": 2084, "y": 868, "floor": 1, "building": "old_A" }
@@ -106,7 +103,6 @@
     "exit_0202": ["0202", "cor_816_211"],
     "exit_to_stairs_new2": ["cor_627_136"],
     "cor_627_136": ["cor_627_211", "exit_to_stairs_new2"],
-
     "cor_627_339": ["exit_0208", "exit_0207", "exit_0209", "exit_0206", "cor_627_211"],
     "cor_627_211": ["cor_627_339", "cor_816_211", "cor_627_136"],
     "cor_816_211": ["cor_627_211", "exit_0201", "exit_0202", "cor_816_340"],
