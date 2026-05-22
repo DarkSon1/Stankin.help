@@ -64,5 +64,18 @@
 
     <datalist id="auditories-list"></datalist>
     <script src="script.js"></script>
+    <!-- Модальное окно выбора аудитории -->
+    <div id="roomModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔍 Выберите аудиторию</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="modalSearch" placeholder="Введите номер аудитории..." autocomplete="off">
+                <div id="modalRoomsList" class="modal-rooms-list"></div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
