@@ -29,8 +29,6 @@ function getImageForNode(node) {
 function findPath(start, end) {
     const paths = graphData.paths;
     const distances = graphData.distances || {};
-
-    // Правило: в аудиторию можно зайти только через её exit_
     const isAuditory = (node) => /^\d{4}$/.test(node) || /^[А-Я]/.test(node);
     const getExit = (node) => `exit_${node}`;
 
@@ -46,7 +44,6 @@ function findPath(start, end) {
 
         let neighbors = paths[node] || [];
 
-        // Если текущий узел — аудитория, следующий шаг ТОЛЬКО через её exit_
         if (isAuditory(node)) {
             const expectedExit = getExit(node);
             neighbors = neighbors.filter(n => n === expectedExit);
