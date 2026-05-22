@@ -147,3 +147,57 @@ button:hover {
 #mapContainer canvas:active {
     cursor: grabbing;
 }
+/* Увеличенные кнопки меню */
+.top-menu {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.menu-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    width: auto;
+    min-width: 120px;
+}
+
+.menu-btn.active {
+    background: #4ecdc4;
+    color: #1a1a2e;
+    font-weight: bold;
+}
+
+/* Красивый datalist */
+input[list] {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 14px 16px;
+    font-size: 1rem;
+    width: 100%;
+    transition: 0.2s;
+}
+
+input[list]:focus {
+    border-color: #4ecdc4;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(78,205,196,0.2);
+}
+
+/* Адаптация */
+@media (max-width: 600px) {
+    .menu-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+        min-width: 100px;
+    }
+}
