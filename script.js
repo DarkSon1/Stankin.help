@@ -51,20 +51,22 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
     img.onload = () => {
         container.innerHTML = '';
 
+        const containerWidth = container.clientWidth - 20;
+        const maxWidth = Math.min(img.width, containerWidth, 1000);
         const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        // Ограничиваем размер на экране (адаптация)
-        const maxWidth = Math.min(img.width, window.innerWidth - 40);
         canvas.width = maxWidth;
         canvas.height = (img.height / img.width) * maxWidth;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        canvas.style.display = 'block';
+        canvas.style.margin = '0 auto';
 
+        const ctx = canvas.getContext('2d');
         const scaleX = canvas.width / img.width;
         const scaleY = canvas.height / img.height;
 
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // Адаптация координат под текущий размер canvas
         const fromX = fromCoord.x * scaleX;
         const fromY = fromCoord.y * scaleY;
         const toX = toCoord.x * scaleX;
@@ -98,14 +100,26 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
         }
     };
     img.onerror = () => {
-        container.innerHTML = `<div style="color:red;">Ошибка загрузки ${imageSrc}</div>`;
+        container.innerHTML = `<div style="color:red; padding:20px;">❌ Ошибка загрузки ${imageSrc}</div>`;
     };
 }
 
-function startManualRoute() {
-    const container = document.getElementById('mapContainer');
-    if (!container) return;
+function startManualRoute(from, to) {
+    const allowedRoutes = [
+        { from: "0208", to: "ТП-8 ЛТТО ЦТМ" },
+        { from: "0208", to: "101" }
+    ];
 
+    const isAllowed = allowedRoutes.some(r => r.from === from && r.to === to);
+
+    if (!isAllowed) {
+        const container = document.getElementById('mapContainer');
+        container.innerHTML = '<div style="padding: 60px; text-align: center; background: #f0f0f0; border-radius: 16px;">🚧 Маршрут скоро появится</div>';
+        document.getElementById('result').style.display = 'block';
+        return;
+    }
+
+    // Жёстко прописанный маршрут через коридоры
     currentSteps = [
         {
             from: "0208",
@@ -148,15 +162,50 @@ function showManualStep() {
     });
 }
 
-// Обработчики
+// Переключение панелей
+document.getElementById('navBtn').addEventListener('click', () => {
+    document.getElementById('navigatorPanel').style.display = 'block';
+    document.getElementById('mapPanel').style.display = 'none';
+    document.getElementById('schedulePanel').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
+    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+    });
+    document.getElementById('navBtn').classList.add('active');
+});
+
+document.getElementById('mapBtn').addEventListener('click', () => {
+    document.getElementById('navigatorPanel').style.display = 'none';
+    document.getElementById('mapPanel').style.display = 'block';
+    document.getElementById('schedulePanel').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
+    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+    });
+    document.getElementById('mapBtn').classList.add('active');
+});
+
+document.getElementById('scheduleBtn').addEventListener('click', () => {
+    document.getElementById('navigatorPanel').style.display = 'none';
+    document.getElementById('mapPanel').style.display = 'none';
+    document.getElementById('schedulePanel').style.display = 'block';
+    document.getElementById('result').style.display = 'none';
+    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => {
+        document.getElementById(id).classList.remove('active');
+    });
+    document.getElementById('scheduleBtn').classList.add('active');
+});
+
+// Обработчики навигатора
 document.getElementById('findBtn').addEventListener('click', async () => {
     const from = document.getElementById('from').value.trim();
     const to = document.getElementById('to').value.trim();
     if (!from || !to) return alert('Введите обе аудитории');
     if (!graphData) await loadGraphData();
 
-    startManualRoute();
+    startManualRoute(from, to);
     document.getElementById('result').style.display = 'block';
+    document.getElementById('navBtn').click();
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
