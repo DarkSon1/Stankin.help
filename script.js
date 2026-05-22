@@ -9,39 +9,56 @@ async function loadGraphData() {
 }
 
 function setupAutocomplete() {
+    // Собираем все аудитории (ключи из 4 цифр) для выпадающего списка
+    const allRooms = Object.keys(graphData.coordinates).filter(k => /^\d{4}$/.test(k));
     const datalist = document.getElementById('auditories-list');
-    if (!datalist) return;
     datalist.innerHTML = '';
-    // Собираем все ключи из coordinates
-    Object.keys(graphData.coordinates).forEach(r => {
+    allRooms.forEach(r => {
         const opt = document.createElement('option');
         opt.value = r;
         datalist.appendChild(opt);
     });
 }
 
+// Поддержка разных корпусов и этажей
 function getImageForNode(node) {
     const c = graphData.coordinates[node];
     if (!c) return null;
-    // Используем поля building и floor из JSON
-    return `/assets/maps/${c.building}_${c.floor}.jpg`;
+    if (c.building === 'new') return `/assets/maps/new_${c.floor}.jpg`;
+    if (c.building === 'old_A') return `/assets/maps/old_A${c.floor}.jpg`;
+    if (c.building === 'old_B') return `/assets/maps/old_B${c.floor}.jpg`;
+    if (c.building === 'transition') return `/assets/maps/transition_new_old.jpg`;
+    return null;
 }
 
+// Алгоритм Дейкстры (учитывает веса)
 function findPath(start, end) {
     const paths = graphData.paths;
     const distances = graphData.distances || {};
+
     const pq = [{ node: start, dist: 0, path: [start] }];
     const visitedDist = { [start]: 0 };
 
     while (pq.length) {
+        // Сортируем очередь для алгоритма Дейкстры (выбираем ближайший узел)
         pq.sort((a, b) => a.dist - b.dist);
         const { node, dist, path } = pq.shift();
+        
         if (node === end) return path;
+
         if (visitedDist[node] !== undefined && visitedDist[node] < dist) continue;
 
-        let neighbors = paths[node] || [];
+        const neighbors = paths[node] || [];
+
         for (const next of neighbors) {
-            const newDist = dist + (distances[`${node}->${next}`] || 1);
+            // Ищем вес ребра в обоих направлениях
+            const edge1 = `${node}-${next}`;
+            const edge2 = `${next}-${node}`;
+            const edgeDist = distances[edge1] !== undefined ? distances[edge1] : 
+                             (distances[edge2] !== undefined ? distances[edge2] : 1);
+            
+            const newDist = dist + edgeDist;
+
             if (visitedDist[next] === undefined || newDist < visitedDist[next]) {
                 visitedDist[next] = newDist;
                 pq.push({ node: next, dist: newDist, path: [...path, next] });
@@ -51,95 +68,156 @@ function findPath(start, end) {
     return null;
 }
 
+// Исправленная разбивка по этажам (без визуальных разрывов)
 function splitPathByImages(path) {
+    if (!path || path.length === 0) return [];
     const steps = [];
-    let currentStepNodes = [path[0]];
+    let currentNodes = [path[0]];
+    let currentImg = getImageForNode(path[0]);
 
-    for (let i = 0; i < path.length - 1; i++) {
-        const from = path[i];
-        const to = path[i + 1];
-        if (getImageForNode(from) === getImageForNode(to)) {
-            currentStepNodes.push(to);
+    for (let i = 1; i < path.length; i++) {
+        const node = path[i];
+        const img = getImageForNode(node);
+
+        if (img === currentImg) {
+            currentNodes.push(node);
         } else {
-            steps.push({ nodes: currentStepNodes, image: getImageForNode(from) });
-            currentStepNodes = [to];
+            // Добавляем узел перехода в текущий шаг, чтобы дорисовать линию до конца
+            currentNodes.push(node);
+            steps.push({ nodes: currentNodes, image: currentImg });
+            
+            // Начинаем следующий шаг с этой же точки
+            currentNodes = [node];
+            currentImg = img;
         }
     }
-    steps.push({ nodes: currentStepNodes, image: getImageForNode(currentStepNodes[0]) });
+    
+    if (currentNodes.length > 1) {
+        steps.push({ nodes: currentNodes, image: currentImg });
+    }
+    
     return steps;
 }
 
-function drawStep(container, step, isFirst, isLast) {
-    const nodes = step.nodes;
-    const imageSrc = step.image;
-    
-    container.innerHTML = '';
+// Отрисовка всего маршрута (линия по всем точкам, а не напрямую сквозь стены)
+function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext) {
     const img = new Image();
     img.src = imageSrc;
     img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0);
+        container.innerHTML = '';
 
-        ctx.strokeStyle = '#ff3333';
-        ctx.lineWidth = 10;
+        const maxWidth = Math.min(img.width, window.innerWidth - 40, 1200);
+        const canvas = document.createElement('canvas');
+        canvas.width = maxWidth;
+        canvas.height = (img.height / img.width) * maxWidth;
+        canvas.style.width = '100%';
+        canvas.style.height = 'auto';
+        canvas.style.touchAction = 'pinch-zoom';
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const scaleX = canvas.width / img.width;
+        const scaleY = canvas.height / img.height;
+
         ctx.beginPath();
-        nodes.forEach((node, i) => {
-            const pos = graphData.coordinates[node];
-            if (i === 0) ctx.moveTo(pos.x, pos.y);
-            else ctx.lineTo(pos.x, pos.y);
+        let firstDrawn = false;
+        let lastX = 0, lastY = 0;
+        let firstX = 0, firstY = 0;
+
+        // Рисуем линии через все коридорные узлы
+        nodes.forEach((node) => {
+            const coord = graphData.coordinates[node];
+            if (coord) {
+                const x = coord.x * scaleX;
+                const y = coord.y * scaleY;
+                if (!firstDrawn) {
+                    ctx.moveTo(x, y);
+                    firstX = x;
+                    firstY = y;
+                    firstDrawn = true;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                lastX = x;
+                lastY = y;
+            }
         });
+
+        // Стилизация линии
+        ctx.strokeStyle = '#ff3333';
+        ctx.lineWidth = 4;
+        ctx.lineJoin = 'round'; // Сглаживание углов поворота
+        ctx.lineCap = 'round';
         ctx.stroke();
+
+        ctx.font = 'bold 16px sans-serif';
+        if (isFirst && firstDrawn) {
+            ctx.fillStyle = '#2196F3';
+            ctx.fillText('🚩 Вы', firstX + 10, firstY - 6);
+        }
+        if (isLast && firstDrawn) {
+            ctx.fillStyle = '#4CAF50';
+            ctx.fillText('🏁', lastX + 10, lastY - 6);
+        }
+
         container.appendChild(canvas);
 
-        // Кнопки
-        const nav = document.createElement('div');
-        nav.className = 'nav-buttons';
-        
-        if (!isFirst) {
-            const btnBack = document.createElement('button');
-            btnBack.className = 'back';
-            btnBack.textContent = '← Назад';
-            btnBack.onclick = () => { currentStep--; showStep(); };
-            nav.appendChild(btnBack);
+        if (onNext) {
+            const btn = document.createElement('button');
+            btn.textContent = '→ Дальше';
+            btn.style.marginTop = '16px';
+            btn.onclick = onNext;
+            container.appendChild(btn);
         }
-
-        if (!isLast) {
-            const btnNext = document.createElement('button');
-            btnNext.textContent = 'Дальше →';
-            btnNext.onclick = () => { currentStep++; showStep(); };
-            nav.appendChild(btnNext);
-        } else {
-            const btnFinish = document.createElement('button');
-            btnFinish.className = 'finish';
-            btnFinish.textContent = '🏁 Финиш';
-            btnFinish.onclick = () => { 
-                document.getElementById('result').style.display = 'none'; 
-                currentStep = 0;
-            };
-            nav.appendChild(btnFinish);
-        }
-        container.appendChild(nav);
     };
+}
+
+function startNavigation(start, end) {
+    const path = findPath(start, end);
+    if (!path) {
+        alert('Маршрут не найден! Проверьте, существуют ли такие аудитории.');
+        return;
+    }
+    currentPathSteps = splitPathByImages(path);
+    currentStep = 0;
+    showStep();
 }
 
 function showStep() {
     const container = document.getElementById('mapContainer');
-    drawStep(container, currentPathSteps[currentStep], currentStep === 0, currentStep === currentPathSteps.length - 1);
+    if (!container) return;
+    const step = currentPathSteps[currentStep];
+    if (!step) return;
+
+    const isFirst = currentStep === 0;
+    const isLast = currentStep === currentPathSteps.length - 1;
+
+    // Передаем массив узлов (step.nodes) вместо start/end
+    drawStep(container, step.nodes, step.image, isFirst, isLast, () => {
+        if (currentStep + 1 < currentPathSteps.length) {
+            currentStep++;
+            showStep();
+        }
+    });
 }
 
 document.getElementById('findBtn').addEventListener('click', async () => {
     const from = document.getElementById('from').value.trim();
     const to = document.getElementById('to').value.trim();
+    if (!from || !to) return alert('Введите обе аудитории');
     if (!graphData) await loadGraphData();
-    const path = findPath(from, to);
-    if (!path) return alert('Маршрут не найден');
-    currentPathSteps = splitPathByImages(path);
-    currentStep = 0;
+    startNavigation(from, to);
     document.getElementById('result').style.display = 'block';
-    showStep();
 });
 
+document.getElementById('resetBtn').addEventListener('click', () => {
+    document.getElementById('from').value = '';
+    document.getElementById('to').value = '';
+    document.getElementById('result').style.display = 'none';
+    document.getElementById('mapContainer').innerHTML = '';
+    currentPathSteps = [];
+    currentStep = 0;
+});
+
+// Инициализация при загрузке
 loadGraphData();
