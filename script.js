@@ -1,21 +1,24 @@
 let graphData = null;
 let currentStep = 0;
-let currentPathNodes = [];
 let currentPathSteps = [];
 
 async function loadGraphData() {
-    const res = await fetch('data/graph.json');
-    graphData = await res.json();
-    setupAutocomplete();
+    try {
+        const res = await fetch('data/graph.json');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        graphData = await res.json();
+        console.log('✅ graphData загружен:', graphData);
+        setupAutocomplete();
+    } catch (err) {
+        console.error('❌ Ошибка загрузки graph.json:', err);
+        alert('Не удалось загрузить данные. Смотри консоль (F12)');
+    }
 }
 
 function setupAutocomplete() {
     const allRooms = [];
     for (let f in graphData.buildings.new.floors)
         allRooms.push(...graphData.buildings.new.floors[f]);
-    for (let w in graphData.buildings.old?.wings || {})
-        for (let f in graphData.buildings.old.wings[w].floors)
-            allRooms.push(...graphData.buildings.old.wings[w].floors[f]);
 
     let datalist = document.getElementById('auditories-list');
     if (!datalist) {
@@ -29,6 +32,7 @@ function setupAutocomplete() {
         opt.value = r;
         datalist.appendChild(opt);
     });
+    console.log('✅ Автокомплит заполнен:', allRooms);
 }
 
 function getImageForNode(node) {
@@ -41,6 +45,9 @@ function getImageForNode(node) {
 
 function findPath(start, end) {
     const paths = graphData.paths;
+    console.log('🔍 Ищем путь от', start, 'до', end);
+    console.log('📋 Доступные paths:', Object.keys(paths));
+
     const queue = [[start]];
     const visited = new Set();
     while (queue.length) {
@@ -53,6 +60,7 @@ function findPath(start, end) {
             if (!visited.has(next)) queue.push([...path, next]);
         }
     }
+    console.warn('❌ Путь не найден');
     return null;
 }
 
@@ -88,13 +96,17 @@ function splitPathByImages(path) {
         });
     }
 
+    console.log('🗺️ Шаги маршрута:', steps);
     return steps;
 }
 
 function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext) {
     const fromCoord = graphData.coordinates[fromNode];
     const toCoord = graphData.coordinates[toNode];
-    if (!fromCoord || !toCoord) return;
+    if (!fromCoord || !toCoord) {
+        console.error('❌ Нет координат для', fromNode, toNode);
+        return;
+    }
 
     const img = new Image();
     img.src = imageSrc;
@@ -143,6 +155,9 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
             btn.onclick = onNext;
             container.appendChild(btn);
         }
+    };
+    img.onerror = () => {
+        container.innerHTML = `<div style="color:red;">Ошибка загрузки ${imageSrc}</div>`;
     };
 }
 
