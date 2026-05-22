@@ -1,8 +1,34 @@
-body { font-family: sans-serif; background: #f4f4f9; padding: 20px; }
-#result { display: none; margin-top: 20px; text-align: center; }
-#mapContainer { max-width: 100%; margin: 0 auto; }
-canvas { max-width: 100%; height: auto; border: 1px solid #ccc; }
+/* 1. Базовые настройки */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background: #f4f4f9; 
+    padding: 20px; 
+    margin: 0;
+}
 
+/* 2. Контейнер результатов */
+#result { 
+    display: none; 
+    margin-top: 20px; 
+    text-align: center; 
+}
+
+#mapContainer { 
+    max-width: 100%; 
+    margin: 0 auto; 
+    overflow: hidden;
+}
+
+/* 3. Отрисовка карты */
+canvas { 
+    max-width: 100%; 
+    height: auto; 
+    border: 1px solid #ccc; 
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    background: white;
+}
+
+/* 4. Навигация */
 .nav-buttons {
     display: flex;
     justify-content: center;
@@ -10,7 +36,7 @@ canvas { max-width: 100%; height: auto; border: 1px solid #ccc; }
     margin-top: 20px;
 }
 
-button {
+.nav-buttons button {
     padding: 12px 24px;
     font-size: 16px;
     cursor: pointer;
@@ -19,8 +45,9 @@ button {
     background: #4CAF50;
     color: white;
     font-weight: bold;
+    transition: background 0.3s;
 }
 
-button:hover { background: #45a049; }
-button.back { background: #f44336; }
-button.finish { background: #2196F3; }
+.nav-buttons button:hover { background: #45a049; }
+.nav-buttons button.back { background: #f44336; }
+.nav-buttons button.finish { background: #2196F3; }
