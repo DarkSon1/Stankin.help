@@ -45,30 +45,11 @@ function findPath(start, end) {
 
 function splitPathByImages(path) {
     const steps = [];
-    let currentStepNodes = [path[0]];
     for (let i = 0; i < path.length - 1; i++) {
-        const from = path[i];
-        const to = path[i + 1];
-        const imgFrom = getImageForNode(from);
-        const imgTo = getImageForNode(to);
-        if (imgFrom === imgTo) {
-            currentStepNodes.push(to);
-        } else {
-            if (currentStepNodes.length >= 2) {
-                steps.push({
-                    from: currentStepNodes[0],
-                    to: currentStepNodes[currentStepNodes.length - 1],
-                    image: imgFrom
-                });
-            }
-            currentStepNodes = [from, to];
-        }
-    }
-    if (currentStepNodes.length >= 2) {
         steps.push({
-            from: currentStepNodes[0],
-            to: currentStepNodes[currentStepNodes.length - 1],
-            image: getImageForNode(currentStepNodes[0])
+            from: path[i],
+            to: path[i + 1],
+            image: getImageForNode(path[i])
         });
     }
     return steps;
