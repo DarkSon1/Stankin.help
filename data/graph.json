@@ -1,45 +1,83 @@
 {
   "coordinates": {
-    "0208": { "x": 150, "y": 300, "building": "new", "floor": "2" },
-    "exit_0208": { "x": 150, "y": 280, "building": "new", "floor": "2" },
-    
-    "0204": { "x": 800, "y": 300, "building": "new", "floor": "2" },
-    "exit_0204": { "x": 800, "y": 280, "building": "new", "floor": "2" },
-    
-    "cor_1": { "x": 150, "y": 250, "building": "new", "floor": "2" },
-    "cor_2": { "x": 450, "y": 250, "building": "new", "floor": "2" },
-    "cor_3": { "x": 800, "y": 250, "building": "new", "floor": "2" },
-    
-    "stairs_new_2": { "x": 450, "y": 100, "building": "new", "floor": "2" },
-    "stairs_new_1": { "x": 450, "y": 100, "building": "new", "floor": "1" },
+    "0208": { "x": 195, "y": 258, "building": "new", "floor": "2" },
+    "0207": { "x": 199, "y": 532, "building": "new", "floor": "2" },
+    "exit_0208_0207": { "x": 198, "y": 339, "building": "new", "floor": "2" },
 
-    "0101": { "x": 300, "y": 400, "building": "new", "floor": "1" },
-    "exit_0101": { "x": 300, "y": 380, "building": "new", "floor": "1" }
+    "0209": { "x": 240, "y": 158, "building": "new", "floor": "2" },
+    "0206": { "x": 248, "y": 479, "building": "new", "floor": "2" },
+    "exit_0209_0206": { "x": 242, "y": 340, "building": "new", "floor": "2" },
+
+    "0204": { "x": 948, "y": 457, "building": "new", "floor": "2" },
+    "exit_0204": { "x": 945, "y": 346, "building": "new", "floor": "2" },
+
+    "0203": { "x": 1048, "y": 205, "building": "new", "floor": "2" },
+    "exit_0203": { "x": 996, "y": 205, "building": "new", "floor": "2" },
+
+    "0201": { "x": 930, "y": 108, "building": "new", "floor": "2" },
+    "0202": { "x": 1089, "y": 114, "building": "new", "floor": "2" },
+    "exit_0201_0202": { "x": 1006, "y": 107, "building": "new", "floor": "2" },
+
+    "transition_to_old": { "x": 1007, "y": 58, "building": "new", "floor": "2" },
+    "stairs_new": { "x": 694, "y": 136, "building": "new", "floor": "2" },
+
+    "cor_1": { "x": 627, "y": 339, "building": "new", "floor": "2" },
+    "cor_2": { "x": 627, "y": 211, "building": "new", "floor": "2" },
+    "cor_3": { "x": 816, "y": 211, "building": "new", "floor": "2" },
+    "cor_4": { "x": 816, "y": 340, "building": "new", "floor": "2" },
+    "cor_5": { "x": 994, "y": 340, "building": "new", "floor": "2" },
+    "cor_6": { "x": 627, "y": 136, "building": "new", "floor": "2" }
   },
   "paths": {
-    "0208": ["exit_0208"],
-    "exit_0208": ["0208", "cor_1"],
-    "cor_1": ["exit_0208", "cor_2"],
-    "cor_2": ["cor_1", "cor_3", "stairs_new_2"],
-    "cor_3": ["cor_2", "exit_0204"],
-    "exit_0204": ["cor_3", "0204"],
+    "0208": ["exit_0208_0207"],
+    "0207": ["exit_0208_0207"],
+    "exit_0208_0207": ["0208", "0207", "exit_0209_0206"],
+
+    "0209": ["exit_0209_0206"],
+    "0206": ["exit_0209_0206"],
+    "exit_0209_0206": ["0209", "0206", "exit_0208_0207", "cor_1"],
+
+    "cor_1": ["exit_0209_0206", "cor_4", "cor_2"],
+    "cor_4": ["cor_1", "exit_0204"],
+    "exit_0204": ["0204", "cor_4", "cor_5"],
     "0204": ["exit_0204"],
 
-    "stairs_new_2": ["cor_2", "stairs_new_1"],
-    "stairs_new_1": ["stairs_new_2", "exit_0101"],
-    "exit_0101": ["stairs_new_1", "0101"],
-    "0101": ["exit_0101"]
+    "cor_5": ["exit_0204", "exit_0203"],
+
+    "cor_2": ["cor_1", "cor_6", "cor_3"],
+    "cor_6": ["cor_2", "stairs_new"],
+    "stairs_new": ["cor_6"],
+
+    "cor_3": ["cor_2", "exit_0203"],
+    "exit_0203": ["0203", "cor_3", "cor_5", "exit_0201_0202"],
+    "0203": ["exit_0203"],
+
+    "exit_0201_0202": ["0201", "0202", "exit_0203", "transition_to_old"],
+    "0201": ["exit_0201_0202"],
+    "0202": ["exit_0201_0202"],
+    "transition_to_old": ["exit_0201_0202"]
   },
   "distances": {
-    "0208-exit_0208": 5,
-    "exit_0208-cor_1": 15,
-    "cor_1-cor_2": 30,
-    "cor_2-cor_3": 35,
-    "cor_3-exit_0204": 15,
-    "exit_0204-0204": 5,
-    "cor_2-stairs_new_2": 15,
-    "stairs_new_2-stairs_new_1": 50,
-    "stairs_new_1-exit_0101": 20,
-    "exit_0101-0101": 5
+    "0208-exit_0208_0207": 81,
+    "0207-exit_0208_0207": 193,
+    "0209-exit_0209_0206": 182,
+    "0206-exit_0209_0206": 139,
+    "exit_0208_0207-exit_0209_0206": 44,
+    "exit_0209_0206-cor_1": 385,
+    "cor_1-cor_4": 189,
+    "cor_4-exit_0204": 129,
+    "0204-exit_0204": 111,
+    "exit_0204-cor_5": 49,
+    "cor_1-cor_2": 128,
+    "cor_2-cor_6": 75,
+    "cor_6-stairs_new": 67,
+    "cor_2-cor_3": 189,
+    "cor_3-exit_0203": 180,
+    "cor_5-exit_0203": 135,
+    "0203-exit_0203": 52,
+    "exit_0203-exit_0201_0202": 98,
+    "0201-exit_0201_0202": 76,
+    "0202-exit_0201_0202": 83,
+    "exit_0201_0202-transition_to_old": 49
   }
 }
