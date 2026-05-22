@@ -33,7 +33,7 @@
                 </div>
                 <div class="input-group">
                     <label>🎯 Куда</label>
-                    <input type="text" id="to" list="auditories-list" placeholder="Например: 0204" autocomplete="off">
+                    <input type="text" id="to" list="auditories-list" placeholder="Например: ТП-8_ЛТТО_ЦТМ" autocomplete="off">
                 </div>
                 <button id="findBtn">Построить маршрут →</button>
                 <button id="resetBtn" style="background: #555; margin-top: 8px;">Сбросить маршрут</button>
@@ -42,11 +42,11 @@
             <div id="result" class="result-card" style="display: none;">
                 <h3>🗺️ Маршрут</h3>
                 <div id="mapContainer"></div>
-                <!-- БЛОК С КНОПКАМИ УПРАВЛЕНИЯ МАРШРУТОМ (появляется, если шагов > 1) -->
-                <div id="routeControls" style="display: none; margin-top: 16px; display: flex; gap: 10px; justify-content: center;">
-                    <button id="prevStepBtn" style="background: #555; width: auto; padding: 10px 20px;">◀ Назад</button>
-                    <button id="nextStepBtn" style="background: #4ecdc4; width: auto; padding: 10px 20px;">Дальше ▶</button>
-                    <button id="finishStepBtn" style="background: #2c7a6e; width: auto; padding: 10px 20px;">🏁 Финиш</button>
+                <!-- КНОПКИ УПРАВЛЕНИЯ МАРШРУТОМ -->
+                <div id="routeControls" style="display: none; margin-top: 16px; gap: 10px; justify-content: center;">
+                    <button id="prevStepBtn" style="background: #555; width: auto; padding: 8px 20px;">◀ Назад</button>
+                    <button id="nextStepBtn" style="background: #4ecdc4; width: auto; padding: 8px 20px;">Дальше ▶</button>
+                    <button id="finishStepBtn" style="background: #2c7a6e; width: auto; padding: 8px 20px;">🏁 Финиш</button>
                 </div>
             </div>
         </div>
