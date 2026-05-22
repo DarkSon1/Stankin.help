@@ -1,33 +1,82 @@
 let graphData = null;
 let currentStep = 0;
 let currentSteps = [];
+let selectedFrom = null;
+let selectedTo = null;
 
 async function loadGraphData() {
     const res = await fetch('data/graph.json');
     graphData = await res.json();
-    setupAutocomplete();
+    buildAuditoryList();
 }
 
-function setupAutocomplete() {
-    const allRooms = [];
-    for (let f in graphData.buildings.new.floors)
-        allRooms.push(...graphData.buildings.new.floors[f]);
-    for (let f in graphData.buildings.old.wings.A.floors)
-        allRooms.push(...graphData.buildings.old.wings.A.floors[f]);
+function buildAuditoryList() {
+    const groups = [
+        { name: "Новый корпус, 1 этаж", rooms: graphData.buildings.new.floors["1"] },
+        { name: "Новый корпус, 2 этаж", rooms: graphData.buildings.new.floors["2"] },
+        { name: "Старый корпус А, 1 этаж", rooms: graphData.buildings.old.wings.A.floors["1"] },
+        { name: "Старый корпус А, 2 этаж", rooms: graphData.buildings.old.wings.A.floors["2"] }
+    ];
 
-    let datalist = document.getElementById('auditories-list');
-    if (!datalist) {
-        datalist = document.createElement('datalist');
-        datalist.id = 'auditories-list';
-        document.body.appendChild(datalist);
-    }
-    datalist.innerHTML = '';
-    allRooms.forEach(r => {
-        const opt = document.createElement('option');
-        opt.value = r;
-        datalist.appendChild(opt);
+    window.auditoryGroups = groups;
+}
+
+function openModal(target) {
+    const modal = document.getElementById('auditoryModal');
+    const modalList = document.getElementById('modalList');
+    modalList.innerHTML = '';
+
+    groups.forEach(group => {
+        if (!group.rooms || group.rooms.length === 0) return;
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'modal-group';
+        groupDiv.innerHTML = `<div class="modal-group-title">${group.name}</div>`;
+        group.rooms.forEach(room => {
+            const item = document.createElement('div');
+            item.className = 'modal-item';
+            item.textContent = room;
+            item.onclick = () => {
+                if (target === 'from') {
+                    selectedFrom = room;
+                    document.querySelector('#fromTrigger .selected-value').textContent = room;
+                } else {
+                    selectedTo = room;
+                    document.querySelector('#toTrigger .selected-value').textContent = room;
+                }
+                document.getElementById('findBtn').disabled = !(selectedFrom && selectedTo);
+                modal.style.display = 'none';
+            };
+            groupDiv.appendChild(item);
+        });
+        modalList.appendChild(groupDiv);
     });
+
+    modal.style.display = 'flex';
 }
+
+// Поиск в модалке
+document.getElementById('modalSearch').addEventListener('input', (e) => {
+    const search = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('.modal-item');
+    items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(search) ? 'block' : 'none';
+    });
+});
+
+// Закрытие модалки
+document.querySelector('.modal-close').onclick = () => {
+    document.getElementById('auditoryModal').style.display = 'none';
+};
+window.onclick = (e) => {
+    if (e.target === document.getElementById('auditoryModal')) {
+        document.getElementById('auditoryModal').style.display = 'none';
+    }
+};
+
+// Триггеры
+document.getElementById('fromTrigger').onclick = () => openModal('from');
+document.getElementById('toTrigger').onclick = () => openModal('to');
 
 function getImageForNode(node) {
     const c = graphData.coordinates[node];
@@ -41,16 +90,12 @@ function getImageForNode(node) {
 function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext) {
     const fromCoord = graphData.coordinates[fromNode];
     const toCoord = graphData.coordinates[toNode];
-    if (!fromCoord || !toCoord) {
-        console.error('Нет координат для', fromNode, toNode);
-        return;
-    }
+    if (!fromCoord || !toCoord) return;
 
     const img = new Image();
     img.src = imageSrc;
     img.onload = () => {
         container.innerHTML = '';
-
         const containerWidth = container.clientWidth - 20;
         const maxWidth = Math.min(img.width, containerWidth, 1000);
         const canvas = document.createElement('canvas');
@@ -58,27 +103,20 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
         canvas.height = (img.height / img.width) * maxWidth;
         canvas.style.width = '100%';
         canvas.style.height = 'auto';
-        canvas.style.display = 'block';
-        canvas.style.margin = '0 auto';
-
         const ctx = canvas.getContext('2d');
         const scaleX = canvas.width / img.width;
         const scaleY = canvas.height / img.height;
-
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
         const fromX = fromCoord.x * scaleX;
         const fromY = fromCoord.y * scaleY;
         const toX = toCoord.x * scaleX;
         const toY = toCoord.y * scaleY;
-
         ctx.beginPath();
         ctx.moveTo(fromX, fromY);
         ctx.lineTo(toX, toY);
         ctx.strokeStyle = '#ff3333';
         ctx.lineWidth = 4;
         ctx.stroke();
-
         ctx.font = 'bold 16px sans-serif';
         if (isFirst) {
             ctx.fillStyle = '#2196F3';
@@ -88,9 +126,7 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
             ctx.fillStyle = '#4CAF50';
             ctx.fillText('🏁', toX + 10, toY - 6);
         }
-
         container.appendChild(canvas);
-
         if (onNext) {
             const btn = document.createElement('button');
             btn.textContent = '→ Дальше';
@@ -99,61 +135,28 @@ function drawStep(container, fromNode, toNode, imageSrc, isFirst, isLast, onNext
             container.appendChild(btn);
         }
     };
-    img.onerror = () => {
-        container.innerHTML = `<div style="color:red; padding:20px;">❌ Ошибка загрузки ${imageSrc}</div>`;
-    };
 }
 
-function startManualRoute(from, to) {
-    const allowedRoutes = [
-        { from: "0208", to: "ТП-8 ЛТТО ЦТМ" },
-        { from: "0208", to: "101" }
-    ];
-
-    const isAllowed = allowedRoutes.some(r => r.from === from && r.to === to);
-
-    if (!isAllowed) {
+function startManualRoute() {
+    if (selectedFrom !== "0208" || selectedTo !== "ТП-8 ЛТТО ЦТМ") {
         const container = document.getElementById('mapContainer');
-        container.innerHTML = '<div style="padding: 60px; text-align: center; background: #f0f0f0; border-radius: 16px;">🚧 Маршрут скоро появится</div>';
+        container.innerHTML = '<div style="padding: 60px; text-align: center;">🚧 Маршрут скоро появится</div>';
         document.getElementById('result').style.display = 'block';
         return;
     }
 
-    // Жёстко прописанный маршрут через коридоры
     currentSteps = [
-        {
-            from: "0208",
-            to: "exit_new_to_transition",
-            image: "/assets/maps/new_2.jpg",
-            isFirst: true,
-            isLast: false
-        },
-        {
-            from: "enter_transition_from_new",
-            to: "exit_transition_to_old",
-            image: "/assets/maps/transition_old_new.png",
-            isFirst: false,
-            isLast: false
-        },
-        {
-            from: "enter_old_from_transition",
-            to: "ТП-8 ЛТТО ЦТМ",
-            image: "/assets/maps/old_1A.jpg",
-            isFirst: false,
-            isLast: true
-        }
+        { from: "0208", to: "exit_new_to_transition", image: "/assets/maps/new_2.jpg", isFirst: true, isLast: false },
+        { from: "enter_transition_from_new", to: "exit_transition_to_old", image: "/assets/maps/transition_old_new.png", isFirst: false, isLast: false },
+        { from: "enter_old_from_transition", to: "ТП-8 ЛТТО ЦТМ", image: "/assets/maps/old_1A.jpg", isFirst: false, isLast: true }
     ];
-
     currentStep = 0;
     showManualStep();
 }
 
 function showManualStep() {
     const container = document.getElementById('mapContainer');
-    if (!container) return;
     const step = currentSteps[currentStep];
-    if (!step) return;
-
     drawStep(container, step.from, step.to, step.image, step.isFirst, step.isLast, () => {
         if (currentStep + 1 < currentSteps.length) {
             currentStep++;
@@ -162,63 +165,49 @@ function showManualStep() {
     });
 }
 
-// Переключение панелей
-document.getElementById('navBtn').addEventListener('click', () => {
-    document.getElementById('navigatorPanel').style.display = 'block';
-    document.getElementById('mapPanel').style.display = 'none';
-    document.getElementById('schedulePanel').style.display = 'none';
-    document.getElementById('result').style.display = 'none';
-    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => {
-        document.getElementById(id).classList.remove('active');
-    });
-    document.getElementById('navBtn').classList.add('active');
-});
-
-document.getElementById('mapBtn').addEventListener('click', () => {
-    document.getElementById('navigatorPanel').style.display = 'none';
-    document.getElementById('mapPanel').style.display = 'block';
-    document.getElementById('schedulePanel').style.display = 'none';
-    document.getElementById('result').style.display = 'none';
-    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => {
-        document.getElementById(id).classList.remove('active');
-    });
-    document.getElementById('mapBtn').classList.add('active');
-});
-
-document.getElementById('scheduleBtn').addEventListener('click', () => {
-    document.getElementById('navigatorPanel').style.display = 'none';
-    document.getElementById('mapPanel').style.display = 'none';
-    document.getElementById('schedulePanel').style.display = 'block';
-    document.getElementById('result').style.display = 'none';
-    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => {
-        document.getElementById(id).classList.remove('active');
-    });
-    document.getElementById('scheduleBtn').classList.add('active');
-});
-
-// Обработчики навигатора
-document.getElementById('findBtn').addEventListener('click', async () => {
-    const from = document.getElementById('from').value.trim();
-    const to = document.getElementById('to').value.trim();
-    if (!from || !to) return alert('Введите обе аудитории');
-    if (!graphData) await loadGraphData();
-
-    startManualRoute(from, to);
+// Остальные обработчики кнопок (переключение панелей, reset и т.д.) остаются без изменений
+document.getElementById('findBtn').addEventListener('click', () => {
+    if (!selectedFrom || !selectedTo) return alert('Выберите обе аудитории');
+    startManualRoute();
     document.getElementById('result').style.display = 'block';
     document.getElementById('navBtn').click();
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
-    document.getElementById('from').value = '';
-    document.getElementById('to').value = '';
+    selectedFrom = null;
+    selectedTo = null;
+    document.querySelector('#fromTrigger .selected-value').textContent = 'Выберите аудиторию';
+    document.querySelector('#toTrigger .selected-value').textContent = 'Выберите аудиторию';
+    document.getElementById('findBtn').disabled = true;
     document.getElementById('result').style.display = 'none';
     document.getElementById('mapContainer').innerHTML = '';
-    currentSteps = [];
-    currentStep = 0;
 });
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-}
+// Переключение панелей (как в предыдущей версии)
+document.getElementById('navBtn').onclick = () => {
+    document.getElementById('navigatorPanel').style.display = 'block';
+    document.getElementById('mapPanel').style.display = 'none';
+    document.getElementById('schedulePanel').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
+    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('navBtn').classList.add('active');
+};
+document.getElementById('mapBtn').onclick = () => {
+    document.getElementById('navigatorPanel').style.display = 'none';
+    document.getElementById('mapPanel').style.display = 'block';
+    document.getElementById('schedulePanel').style.display = 'none';
+    document.getElementById('result').style.display = 'none';
+    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('mapBtn').classList.add('active');
+};
+document.getElementById('scheduleBtn').onclick = () => {
+    document.getElementById('navigatorPanel').style.display = 'none';
+    document.getElementById('mapPanel').style.display = 'none';
+    document.getElementById('schedulePanel').style.display = 'block';
+    document.getElementById('result').style.display = 'none';
+    ['navBtn', 'mapBtn', 'scheduleBtn'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('scheduleBtn').classList.add('active');
+};
 
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 loadGraphData();
