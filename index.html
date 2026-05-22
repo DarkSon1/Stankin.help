@@ -36,6 +36,9 @@
     </div>
 
     <datalist id="auditories-list"></datalist>
-    <script src="script.js"></script>
+    <script>
+    const version = Date.now();
+    document.write('<script src="script.js?v=' + version + '"><\/script>');
+</script>
 </body>
 </html>
