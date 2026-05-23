@@ -29,10 +29,16 @@ function setupAutocomplete() {
 function getImageForNode(node) {
     const c = graphData.coordinates[node];
     if (!c) return null;
-    if (c.building === 'new') return `/assets/maps/new_${c.floor}.jpg`;
-    if (c.building === 'old_A') return `/assets/maps/old_A${c.floor}.jpg`;
-    if (c.building === 'old_B') return `/assets/maps/old_B${c.floor}.jpg`;
-    if (c.building === 'transition') return `/assets/maps/transition_new_old.jpg`;
+
+    // Новый корпус: подставляет этаж, получается new_1.jpg или new_2.jpg
+    if (c.building === 'new') return `assets/maps/new_${c.floor}.jpg`;
+    
+    // Старый корпус А: подставляет этаж, получается old_1A.jpg или old_2A.jpg
+    if (c.building === 'old_A') return `assets/maps/old_${c.floor}A.jpg`;
+    
+    // Переход: жестко заданный путь с правильным форматом .png
+    if (c.building === 'transition') return `assets/maps/transition_new_old.png`;
+    
     return null;
 }
 
