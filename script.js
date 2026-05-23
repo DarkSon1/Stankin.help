@@ -63,11 +63,26 @@ function renderRoomList() {
     const searchQuery = document.getElementById('roomSearchInput').value.toLowerCase().trim();
     container.innerHTML = '';
 
-    // Берем все ключи графа и оставляем только те, что похожи на аудитории 
-    // (Исключаем служебные: cor_, exit_, stairs_, transition_ и т.д.)
-    const rooms = Object.keys(graphData.coordinates).filter(k => 
-        !k.startsWith('cor_') && !k.startsWith('exit_') && !k.startsWith('stairs_')
-    );
+    // 1. Точные названия технических узлов, которые нужно спрятать
+    const hiddenExact = [
+        'transition_to_old', 'old_from_trans', 
+        'trans_from_new', 'trans_to_old'
+    ];
+
+    // 2. Кусочки (префиксы) названий технических узлов, которые нужно спрятать
+    const hiddenPrefixes = [
+        'cor_', 'exit_', 'stairs_', 'old_cor_', 'trans_cor_'
+    ];
+
+    // Фильтруем граф
+    const rooms = Object.keys(graphData.coordinates).filter(k => {
+        // Если имя есть в списке точных совпадений - убираем
+        if (hiddenExact.includes(k)) return false;
+        // Если имя начинается с технического префикса - убираем
+        if (hiddenPrefixes.some(prefix => k.startsWith(prefix))) return false;
+        
+        return true; // Остальные оставляем
+    });
 
     const groups = {};
 
@@ -77,8 +92,14 @@ function renderRoomList() {
 
         const c = graphData.coordinates[room];
         const bName = buildingNames[c.building] || 'Неизвестный корпус';
-        // Формируем заголовок группы, например: "Новый корпус, 2 этаж"
-        const groupName = `${bName}, ${c.floor} этаж`;
+        
+        // --- УБИРАЕМ ЭТАЖ ДЛЯ ПЕРЕХОДА ---
+        let groupName;
+        if (c.building === 'transition') {
+            groupName = bName; // Просто "Переход"
+        } else {
+            groupName = `${bName}, ${c.floor} этаж`; // Для остальных добавляем этаж
+        }
 
         if (!groups[groupName]) groups[groupName] = [];
         groups[groupName].push(room);
@@ -101,7 +122,6 @@ function renderRoomList() {
             const item = document.createElement('div');
             item.className = 'room-item';
             
-            // Если в графе ключ называется "ТП-8_ЛТТО_ЦТМ", он так и выведется
             item.textContent = room; 
             
             item.onclick = () => {
