@@ -17,20 +17,18 @@
             <p class="tagline">Коридорный навигатор</p>
         </div>
 
-        <!-- ТРИ ВКЛАДКИ -->
         <div class="top-menu">
             <button class="menu-btn active" data-tab="nav">🧭 Навигация</button>
             <button class="menu-btn" data-tab="map">🗺️ Карта вуза</button>
             <button class="menu-btn" data-tab="schedule">📅 Расписание</button>
         </div>
 
-        <!-- ВКЛАДКА НАВИГАЦИЯ -->
         <div id="navTab" class="tab-content active">
             <div class="input-card">
-               <div class="input-group">
-                   <label>📍 Откуда</label>
-                   <input type="text" id="from" placeholder="Нажмите для выбора..." readonly>
-               </div>
+                <div class="input-group">
+                    <label>📍 Откуда</label>
+                    <input type="text" id="from" placeholder="Нажмите для выбора..." readonly>
+                </div>
                 <div class="input-group">
                     <label>🎯 Куда</label>
                     <input type="text" id="to" placeholder="Нажмите для выбора..." readonly>
@@ -45,7 +43,6 @@
             </div>
         </div>
 
-        <!-- ВКЛАДКА КАРТА ВУЗА (ЗАГЛУШКА) -->
         <div id="mapTab" class="tab-content" style="display: none;">
             <div class="info-card">
                 <h3>🗺️ Карта университета</h3>
@@ -53,16 +50,36 @@
             </div>
         </div>
 
-        <!-- ВКЛАДКА РАСПИСАНИЕ (ЗАГЛУШКА) -->
         <div id="scheduleTab" class="tab-content" style="display: none;">
             <div class="info-card">
                 <h3>📅 Расписание</h3>
-                <p>Раздел в разработке. Скоро здесь появится расписание занятий.</p>
+                <p>Раздел в разработке. Скоро здесь появится расписание.</p>
             </div>
         </div>
     </div>
 
-    <datalist id="auditories-list"></datalist>
+    <div id="roomSelectorModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Выберите аудиторию</h3>
+                <button id="closeModalBtn" class="close-btn">&times;</button>
+            </div>
+            <input type="text" id="roomSearchInput" class="search-input" placeholder="Поиск (номер, название...)">
+            <div id="roomListContainer" class="room-list">
+                </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
+    <script>
+        // Регистрация Service Worker для работы PWA автономно
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.error(err));
+        }
+    </script>
 </body>
 </html>
+
+
+
+
