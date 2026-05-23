@@ -13,16 +13,104 @@ async function loadGraphData() {
     }
 }
 
-// 2. Настройка автокомплита (ищет все 4-значные аудитории)
+// 2. Логика модального окна выбора аудиторий
+let currentInputTarget = null;
+
+const buildingNames = {
+    'new': 'Новый корпус',
+    'old_A': 'Старый корпус А',
+    'old_B': 'Старый корпус Б',
+    'transition': 'Переход'
+};
+
 function setupAutocomplete() {
-    const allRooms = Object.keys(graphData.coordinates).filter(k => !k.includes('_') && k !== 'transition_to_old');
-    const datalist = document.getElementById('auditories-list');
-    datalist.innerHTML = '';
-    allRooms.forEach(r => {
-        const opt = document.createElement('option');
-        opt.value = r;
-        datalist.appendChild(opt);
+    const fromInput = document.getElementById('from');
+    const toInput = document.getElementById('to');
+
+    // Привязываем открытие окна к клику по полям
+    fromInput.addEventListener('click', () => openModal('from'));
+    toInput.addEventListener('click', () => openModal('to'));
+
+    // Кнопка закрытия окна
+    document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+    
+    // Живой поиск при вводе
+    document.getElementById('roomSearchInput').addEventListener('input', renderRoomList);
+    
+    // Закрытие при клике мимо окна (по темному фону)
+    document.getElementById('roomSelectorModal').addEventListener('click', (e) => {
+        if (e.target.id === 'roomSelectorModal') closeModal();
     });
+}
+
+function openModal(target) {
+    currentInputTarget = target;
+    document.getElementById('modalTitle').textContent = target === 'from' ? '📍 Откуда идем?' : '🎯 Куда идем?';
+    document.getElementById('roomSearchInput').value = '';
+    document.getElementById('roomSelectorModal').classList.add('active');
+    renderRoomList();
+    
+    // Автофокус на поле поиска с задержкой (полезно для мобилок)
+    setTimeout(() => document.getElementById('roomSearchInput').focus(), 100);
+}
+
+function closeModal() {
+    document.getElementById('roomSelectorModal').classList.remove('active');
+}
+
+function renderRoomList() {
+    const container = document.getElementById('roomListContainer');
+    const searchQuery = document.getElementById('roomSearchInput').value.toLowerCase().trim();
+    container.innerHTML = '';
+
+    // Берем все ключи графа и оставляем только те, что похожи на аудитории 
+    // (Исключаем служебные: cor_, exit_, stairs_, transition_ и т.д.)
+    const rooms = Object.keys(graphData.coordinates).filter(k => 
+        !k.startsWith('cor_') && !k.startsWith('exit_') && !k.startsWith('stairs_')
+    );
+
+    const groups = {};
+
+    rooms.forEach(room => {
+        // Фильтр поиска по названию аудитории
+        if (searchQuery && !room.toLowerCase().includes(searchQuery)) return;
+
+        const c = graphData.coordinates[room];
+        const bName = buildingNames[c.building] || 'Неизвестный корпус';
+        // Формируем заголовок группы, например: "Новый корпус, 2 этаж"
+        const groupName = `${bName}, ${c.floor} этаж`;
+
+        if (!groups[groupName]) groups[groupName] = [];
+        groups[groupName].push(room);
+    });
+
+    if (Object.keys(groups).length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #888; margin-top: 20px;">Ничего не найдено 😔</div>';
+        return;
+    }
+
+    // Рисуем списки по группам
+    for (const [groupName, groupRooms] of Object.entries(groups)) {
+        const title = document.createElement('div');
+        title.className = 'room-group-title';
+        title.textContent = groupName;
+        container.appendChild(title);
+
+        // Сортируем аудитории по алфавиту/цифрам
+        groupRooms.sort().forEach(room => {
+            const item = document.createElement('div');
+            item.className = 'room-item';
+            
+            // Если в графе ключ называется "ТП-8_ЛТТО_ЦТМ", он так и выведется
+            item.textContent = room; 
+            
+            item.onclick = () => {
+                document.getElementById(currentInputTarget).value = room;
+                closeModal();
+            };
+            container.appendChild(item);
+        });
+    }
 }
 
 // 3. Получение правильной картинки в зависимости от корпуса и этажа
