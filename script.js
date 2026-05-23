@@ -15,7 +15,7 @@ async function loadGraphData() {
 
 // 2. Настройка автокомплита (ищет все 4-значные аудитории)
 function setupAutocomplete() {
-    const allRooms = Object.keys(graphData.coordinates).filter(k => /^\d{4}$/.test(k));
+    const allRooms = Object.keys(graphData.coordinates).filter(k => !k.includes('_') && k !== 'transition_to_old');
     const datalist = document.getElementById('auditories-list');
     datalist.innerHTML = '';
     allRooms.forEach(r => {
