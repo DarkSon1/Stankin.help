@@ -260,23 +260,6 @@ function showStep() {
     );
 }
 
-function showStep() {
-    const container = document.getElementById('mapContainer');
-    if (!container) return;
-    const step = currentPathSteps[currentStep];
-    if (!step) return;
-
-    const isFirst = currentStep === 0;
-    const isLast = currentStep === currentPathSteps.length - 1;
-
-    drawStep(container, step.nodes, step.image, isFirst, isLast, () => {
-        if (currentStep + 1 < currentPathSteps.length) {
-            currentStep++;
-            showStep();
-        }
-    });
-}
-
 document.getElementById('findBtn').addEventListener('click', async () => {
     const from = document.getElementById('from').value.trim();
     const to = document.getElementById('to').value.trim();
