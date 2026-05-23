@@ -72,7 +72,7 @@ function findPath(start, end) {
     return null; // Путь не найден
 }
 
-// 5. Разбивка пути на этажи/картинки (сохраняет связность на лестницах/переходах)
+// 5. Разбивка пути на этажи/картинки (ИСПРАВЛЕННАЯ)
 function splitPathByImages(path) {
     if (!path || path.length === 0) return [];
     const steps = [];
@@ -86,26 +86,31 @@ function splitPathByImages(path) {
         if (img === currentImg) {
             currentNodes.push(node);
         } else {
-            // Завершаем текущий кусок точкой перехода
-            currentNodes.push(node);
+            // Картинка сменилась! Сохраняем старый маршрут БЕЗ чужой точки
             steps.push({ nodes: currentNodes, image: currentImg });
             
-            // Начинаем новый кусок с этой же точки
+            // Начинаем новый шаг с новой точки
             currentNodes = [node];
             currentImg = img;
         }
     }
     
-    if (currentNodes.length > 1) {
+    if (currentNodes.length > 0) {
         steps.push({ nodes: currentNodes, image: currentImg });
     }
     
     return steps;
 }
 
-// 6. Отрисовка маршрута с новыми кнопками
+// 6. Отрисовка маршрута с кнопками (ИСПРАВЛЕННАЯ)
 function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext, onPrev, onFinish) {
     const img = new Image();
+    
+    // Если картинка не найдена, покажем ошибку, чтобы кнопка "не зависала" молча
+    img.onerror = () => {
+        alert(`Ошибка: Не могу загрузить карту!\nСкрипт ищет файл по пути: ${imageSrc}\nПроверь, как точно называется эта картинка в папке /assets/maps/!`);
+    };
+
     img.src = imageSrc;
     img.onload = () => {
         container.innerHTML = '';
@@ -128,7 +133,6 @@ function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext, onPrev, o
         let lastX = 0, lastY = 0;
         let firstX = 0, firstY = 0;
 
-        // Рисуем ломаную линию через все узлы массива
         nodes.forEach((node) => {
             const coord = graphData.coordinates[node];
             if (coord) {
@@ -147,25 +151,18 @@ function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext, onPrev, o
             }
         });
 
-        // Настройки линии
         ctx.strokeStyle = '#ff3333';
         ctx.lineWidth = 4;
         ctx.lineJoin = 'round'; 
         ctx.lineCap = 'round';
         ctx.stroke();
 
-        // Рисуем флажки
         ctx.font = 'bold 20px sans-serif';
-        if (isFirst && firstDrawn) {
-            ctx.fillText('🚩', firstX - 10, firstY - 10);
-        }
-        if (isLast && firstDrawn) {
-            ctx.fillText('🏁', lastX - 10, lastY - 10);
-        }
+        if (isFirst && firstDrawn) ctx.fillText('🚩', firstX - 10, firstY - 10);
+        if (isLast && firstDrawn) ctx.fillText('🏁', lastX - 10, lastY - 10);
 
         container.appendChild(canvas);
 
-        // --- ПАНЕЛЬ КНОПОК НАВИГАЦИИ ---
         const navBar = document.createElement('div');
         navBar.style.display = 'flex';
         navBar.style.justifyContent = 'center';
@@ -173,29 +170,25 @@ function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext, onPrev, o
         navBar.style.marginTop = '15px';
         navBar.style.width = '100%';
 
-        // Кнопка "Назад" (показываем, если это не первое фото)
         if (!isFirst) {
             const btnPrev = document.createElement('button');
             btnPrev.textContent = '← Назад';
-            btnPrev.style.background = '#ff9f43'; // Оранжевый цвет для отличия
+            btnPrev.style.background = '#ff9f43';
             btnPrev.style.flex = '1';
             btnPrev.onclick = onPrev;
             navBar.appendChild(btnPrev);
         }
 
-        // Кнопка "Дальше" (показываем, если это не последнее фото)
         if (!isLast) {
             const btnNext = document.createElement('button');
             btnNext.textContent = 'Дальше →';
             btnNext.style.flex = '1';
             btnNext.onclick = onNext;
             navBar.appendChild(btnNext);
-        } 
-        // Кнопка "Финиш" (показываем только на последнем фото)
-        else {
+        } else {
             const btnFinish = document.createElement('button');
             btnFinish.textContent = '🏁 Финиш';
-            btnFinish.style.background = '#ff6b6b'; // Красный/розовый цвет для финиша
+            btnFinish.style.background = '#ff6b6b';
             btnFinish.style.flex = '1';
             btnFinish.onclick = onFinish;
             navBar.appendChild(btnFinish);
