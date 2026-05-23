@@ -103,8 +103,8 @@ function splitPathByImages(path) {
     return steps;
 }
 
-// 6. Отрисовка маршрута
-function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext) {
+// 6. Отрисовка маршрута с новыми кнопками
+function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext, onPrev, onFinish) {
     const img = new Image();
     img.src = imageSrc;
     img.onload = () => {
@@ -165,18 +165,47 @@ function drawStep(container, nodes, imageSrc, isFirst, isLast, onNext) {
 
         container.appendChild(canvas);
 
-        // Кнопка перехода на следующий этаж
-        if (onNext) {
-            const btn = document.createElement('button');
-            btn.textContent = '→ Переход на следующий этаж/корпус';
-            btn.style.marginTop = '16px';
-            btn.onclick = onNext;
-            container.appendChild(btn);
+        // --- ПАНЕЛЬ КНОПОК НАВИГАЦИИ ---
+        const navBar = document.createElement('div');
+        navBar.style.display = 'flex';
+        navBar.style.justifyContent = 'center';
+        navBar.style.gap = '10px';
+        navBar.style.marginTop = '15px';
+        navBar.style.width = '100%';
+
+        // Кнопка "Назад" (показываем, если это не первое фото)
+        if (!isFirst) {
+            const btnPrev = document.createElement('button');
+            btnPrev.textContent = '← Назад';
+            btnPrev.style.background = '#ff9f43'; // Оранжевый цвет для отличия
+            btnPrev.style.flex = '1';
+            btnPrev.onclick = onPrev;
+            navBar.appendChild(btnPrev);
         }
+
+        // Кнопка "Дальше" (показываем, если это не последнее фото)
+        if (!isLast) {
+            const btnNext = document.createElement('button');
+            btnNext.textContent = 'Дальше →';
+            btnNext.style.flex = '1';
+            btnNext.onclick = onNext;
+            navBar.appendChild(btnNext);
+        } 
+        // Кнопка "Финиш" (показываем только на последнем фото)
+        else {
+            const btnFinish = document.createElement('button');
+            btnFinish.textContent = '🏁 Финиш';
+            btnFinish.style.background = '#ff6b6b'; // Красный/розовый цвет для финиша
+            btnFinish.style.flex = '1';
+            btnFinish.onclick = onFinish;
+            navBar.appendChild(btnFinish);
+        }
+
+        container.appendChild(navBar);
     };
 }
 
-// 7. Управление интерфейсом
+// 7. Управление интерфейсом и переключением шагов
 function startNavigation(start, end) {
     const path = findPath(start, end);
     if (!path) {
@@ -186,6 +215,49 @@ function startNavigation(start, end) {
     currentPathSteps = splitPathByImages(path);
     currentStep = 0;
     showStep();
+}
+
+function showStep() {
+    const container = document.getElementById('mapContainer');
+    if (!container) return;
+    const step = currentPathSteps[currentStep];
+    if (!step) return;
+
+    const isFirst = currentStep === 0;
+    const isLast = currentStep === currentPathSteps.length - 1;
+
+    // Передаем в drawStep функции для каждой кнопки
+    drawStep(
+        container, 
+        step.nodes, 
+        step.image, 
+        isFirst, 
+        isLast, 
+        // Логика кнопки "Дальше"
+        () => {
+            if (currentStep + 1 < currentPathSteps.length) {
+                currentStep++;
+                showStep();
+            }
+        },
+        // Логика кнопки "Назад"
+        () => {
+            if (currentStep > 0) {
+                currentStep--;
+                showStep();
+            }
+        },
+        // Логика кнопки "Финиш"
+        () => {
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('from').value = '';
+            document.getElementById('to').value = '';
+            currentPathSteps = [];
+            currentStep = 0;
+            // Можно убрать alert, если он раздражает, но он дает понять, что маршрут окончен
+            alert('Маршрут успешно завершен!'); 
+        }
+    );
 }
 
 function showStep() {
